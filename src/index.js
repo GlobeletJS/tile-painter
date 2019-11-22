@@ -6,7 +6,7 @@ import { buildFeatureFilter } from "./filter.js";
 export function initPainter(params) {
   const style = params.styleLayer;
   const sprite = params.spriteObject;
-  const canvasSize = params.canvasSize;
+  const canvasSize = params.canvasSize || 512;
 
   // Define data prep and rendering functions
   var getData, render;

@@ -9,8 +9,8 @@ implementing ~80% of the style specification with 20% of the code.
 Rendering is done with [Canvas 2D] methods rather than WebGL. This makes the
 code simpler, but slower.
 
-[Canvas 2D]: (https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D)
-[specification]: (https://docs.mapbox.com/mapbox-gl-js/style-spec/#layers)
+[Canvas 2D]: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D
+[specification]: https://docs.mapbox.com/mapbox-gl-js/style-spec/#layers
 
 ## Installation
 tile-painter is provided as an ESM import.
@@ -21,14 +21,16 @@ import { initPainter } from 'tile-painter';
 ## Initialization
 initPainter takes a parameter object with the following properties:
 - canvasSize (integer): the pixel size of the (square) Canvas to which the 
-  layer will be rendered
+  layer will be rendered. Default: 512
 - styleLayer (object): an element from the layers array of a Mapbox style
   document. See the [specification] for the allowed properties of a layer.
+  REQUIRED
 - spriteObject (object): an object pointing to the data for a sprite atlas.
   Must include `image` and `meta` properties, pointing to *the actual data*
   (PNG and JSON). If you are starting from a style document with a URL string,
   you will need to load the data from the URL and put it in an object before
-  calling tilePainter.init
+  calling initPainter. REQUIRED if `layer.type === "symbol"` and
+  `icon-<property>` parameters are set
 
 ## API
 initPainter returns a painter function, which will render the styleLayer
@@ -48,9 +50,12 @@ on a supplied Canvas. The painter function takes four parameters:
   rendered symbols. If there is a collision, the new symbol will not be
   rendered. If there is no collision, the new symbol will be rendered, and
   its bounding box added to the array. Bounding boxes are supplied in the
-  form [[xmin, ymin], [xmax, ymax]] in the current tile's pixel coordinates.
+  form [[xmin, ymin], [xmax, ymax]] in the current tile's pixel coordinates
 
 ## Un-implemented features
 tile-painter is a work in progress. Many features not implemented yet.
 Incomplete features include:
-- this list
+
+- This list
+
+Pull requests are welcomed!
