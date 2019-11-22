@@ -1,0 +1,43 @@
+{
+  "directories": {},
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-examples": "npm run rollup-examples",
+    "rollup-examples": "cd examples && rollup -c",
+    "postversion": "git push && git push --tags"
+  },
+  "author": "Jeshurun Hembd",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^0.11.1",
+    "rollup": "^1.27.3",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-json": "^4.0.0",
+    "rollup-plugin-node-resolve": "^5.2.0"
+  },
+  "name": "tile-painter",
+  "description": "Parse Mapbox style documents into rendering functions",
+  "version": "0.0.0",
+  "main": "src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GlobeletJS/tile-painter.git"
+  },
+  "keywords": [
+    "map",
+    "style",
+    "render",
+    "Canvas2D"
+  ],
+  "bugs": {
+    "url": "https://github.com/GlobeletJS/tile-painter/issues"
+  },
+  "homepage": "https://github.com/GlobeletJS/tile-painter#readme",
+  "dependencies": {
+    "csscolorparser": "^1.0.3",
+    "d3-geo": "^1.11.9"
+  }
+}
