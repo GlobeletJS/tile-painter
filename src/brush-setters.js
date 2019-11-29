@@ -1,4 +1,4 @@
-import { buildStyleFunc } from "./style-function.js";
+import { buildStyleFunc } from "./style-func.js";
 
 function getSetter(styleProperty, setter) {
   // For each relevant style property, return functions to:
@@ -59,12 +59,18 @@ export function getSetters(style) {
       setters.push(
         getSetter(paint["fill-color"], "fillStyle"),
         getSetter(paint["fill-opacity"], "globalAlpha"),
-        // fill-outline-color, 
         // fill-translate, 
         // fill-translate-anchor,
         // fill-pattern,
       );
       methods.push("fill");
+      if (paint["fill-outline-color"]) {
+        setters.push(
+          getSetter(paint["fill-outline-color"], "strokeStyle"),
+          getSetter(paint["fill-outline-width"], "lineWidth"), // nonstandard
+        );
+        methods.push("stroke");
+      }
       break;
 
     default:

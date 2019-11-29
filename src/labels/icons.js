@@ -1,4 +1,4 @@
-import { collectGetters } from "./style-function.js";
+import { collectGetters } from "../style-func.js";
 import { getTokenParser } from "./tokens.js";
 
 export function iconSetup(style, sprite) {

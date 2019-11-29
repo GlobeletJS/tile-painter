@@ -1,6 +1,6 @@
 import { initBackgroundFill, initRasterFill  } from "./roller.js";
 import { initBrush   } from "./brush.js";
-import { initLabeler } from "./labeler.js";
+import { initLabeler } from "./labels/labeler.js";
 import { buildFeatureFilter } from "./filter.js";
 
 export function initPainter(params) {

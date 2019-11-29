@@ -1,4 +1,4 @@
-import { collectGetters } from "./style-function.js";
+import { collectGetters } from "./style-func.js";
 // Renders layers that cover the whole tile (like painting with a roller)
 
 export function initBackgroundFill(style, canvSize) {
