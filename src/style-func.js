@@ -1,9 +1,9 @@
 import { buildInterpFunc } from "./interpolate.js";
 
-export function collectGetters(properties = {}, keyDefaultPairs) {
+export function autoGetters(properties = {}, defaults) {
   const getters = {};
-  keyDefaultPairs.forEach( ([key, defaultVal]) => {
-    getters[key] = buildStyleFunc(properties[key], defaultVal);
+  Object.keys(defaults).forEach(key => {
+    getters[key] = buildStyleFunc(properties[key], defaults[key]);
   });
   return getters;
 }

@@ -1,16 +1,6 @@
-import { collectGetters } from "../style-func.js";
 import { getTokenParser } from "./tokens.js";
 
-export function iconSetup(style, sprite) {
-  const getLayout = collectGetters(style.layout, [
-    ["icon-image"],
-    ["icon-padding", 2],
-  ]);
-
-  return (ctx, zoom) => initIconLabeler(ctx, zoom, getLayout, sprite);
-}
-
-function initIconLabeler(ctx, zoom, layout, sprite) {
+export function initIconLabeler(ctx, zoom, layout, paint, sprite) {
   const getSpriteID = getTokenParser( layout["icon-image"](zoom) );
   const iconPadding = layout["icon-padding"](zoom);
 

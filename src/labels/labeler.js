@@ -1,16 +1,13 @@
-import { textSetup } from "./text.js";
-import { iconSetup } from "./icons.js";
+import { initTextLabeler } from "./text.js";
+import { initIconLabeler } from "./icons.js";
 
-export function initLabeler(style, sprite) {
+export function initLabeler(layout, paint, sprite) {
   // Skip unsupported symbol types
-  if (style.layout["symbol-placement"] === "line") return () => undefined;
-
-  const initTextLabeler = textSetup(style);
-  const initIconLabeler = iconSetup(style, sprite);
+  if (layout["symbol-placement"]() === "line") return () => undefined;
 
   return function(ctx, zoom, data, boxes) {
-    const textLabeler = initTextLabeler(ctx, zoom);
-    const iconLabeler = initIconLabeler(ctx, zoom);
+    const textLabeler = initTextLabeler(ctx, zoom, layout, paint);
+    const iconLabeler = initIconLabeler(ctx, zoom, layout, paint, sprite);
 
     data.features.forEach(drawLabel);
 

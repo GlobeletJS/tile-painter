@@ -1,26 +1,14 @@
-import { buildStyleFunc } from "./style-func.js";
+function canv(property) {
+  // Create a default state setter for a Canvas 2D renderer
+  return (val, ctx) => { ctx[property] = val; };
+}
 
-function getSetter(styleProperty, setter) {
-  // For each relevant style property, return functions to:
-  // 1. Get the style value. This function could depend on the data
-  //    (feature.properties), or only on the zoom level.
-  const getStyle = buildStyleFunc(styleProperty);
-
-  // 2. Set the Canvas/d3-path state based on the style value. In general,
-  //    the setter signature is setState(val, context, path)
-  const setState = (typeof setter === "string")
-    ? (val, ctx) => { ctx[setter] = val; } // Default setter sets Canvas state
-    : setter;
-
-  // These 2 functions will be composed, i.e., setState(getStyle(...), ...)
-  // But we return them separately for now, since we may want to use the style
-  // values first, e.g. for sorting the data
+function pair(getStyle, setState) {
+  // Return a style value getter and a renderer state setter as a paired object
   return { getStyle, setState };
 }
 
-export function getSetters(style) {
-  const layout = style.layout;
-  const paint = style.paint;
+export function getSetters(style, layout, paint) {
   const setters = [], methods = [];
 
   switch (style.type) {
@@ -29,24 +17,24 @@ export function getSetters(style) {
         if (radius) path.pointRadius(radius); 
       };
       setters.push(
-        getSetter(paint["circle-radius"], setRadius),
-        getSetter(paint["circle-color"], "fillStyle"),
-        getSetter(paint["circle-opacity"], "globalAlpha"),
+        pair(paint["circle-radius"], setRadius),
+        pair(paint["circle-color"], canv("fillStyle")),
+        pair(paint["circle-opacity"], canv("globalAlpha")),
       );
       methods.push("fill");
       break;
 
     case "line":
       if (layout) setters.push(
-        getSetter(layout["line-cap"], "lineCap"),
-        getSetter(layout["line-join"], "lineJoin"),
-        getSetter(layout["line-miter-limit"], "miterLimit"),
+        pair(layout["line-cap"], canv("lineCap")),
+        pair(layout["line-join"], canv("lineJoin")),
+        pair(layout["line-miter-limit"], canv("miterLimit")),
         // line-round-limit,
       );
       setters.push(
-        getSetter(paint["line-width"], "lineWidth"),
-        getSetter(paint["line-opacity"], "globalAlpha"),
-        getSetter(paint["line-color"], "strokeStyle"),
+        pair(paint["line-width"], canv("lineWidth")),
+        pair(paint["line-opacity"], canv("globalAlpha")),
+        pair(paint["line-color"], canv("strokeStyle")),
         // line-gap-width, 
         // line-translate, line-translate-anchor,
         // line-offset, line-blur, line-gradient, line-pattern, 
@@ -57,17 +45,18 @@ export function getSetters(style) {
 
     case "fill":
       setters.push(
-        getSetter(paint["fill-color"], "fillStyle"),
-        getSetter(paint["fill-opacity"], "globalAlpha"),
+        pair(paint["fill-color"], canv("fillStyle")),
+        pair(paint["fill-opacity"], canv("globalAlpha")),
         // fill-translate, 
         // fill-translate-anchor,
         // fill-pattern,
       );
       methods.push("fill");
-      if (paint["fill-outline-color"]) {
+      let outline = paint["fill-outline-color"];
+      if (outline.type !== "constant" || outline() !== undefined) {
         setters.push(
-          getSetter(paint["fill-outline-color"], "strokeStyle"),
-          getSetter(paint["fill-outline-width"], "lineWidth"), // nonstandard
+          pair(paint["fill-outline-color"], canv("strokeStyle")),
+          pair(paint["fill-outline-width"], canv("lineWidth")), // nonstandard
         );
         methods.push("stroke");
       }

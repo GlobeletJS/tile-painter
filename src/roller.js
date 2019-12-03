@@ -1,12 +1,6 @@
-import { collectGetters } from "./style-func.js";
 // Renders layers that cover the whole tile (like painting with a roller)
 
-export function initBackgroundFill(style, canvSize) {
-  const paint = collectGetters(style.paint, [
-    ["background-color"],
-    ["background-opacity"],
-  ]);
-
+export function initBackgroundFill(layout, paint, canvSize) {
   return function(ctx, zoom) {
     ctx.fillStyle = paint["background-color"](zoom);
     ctx.globalAlpha = paint["background-opacity"](zoom);
@@ -14,16 +8,7 @@ export function initBackgroundFill(style, canvSize) {
   }
 }
 
-export function initRasterFill(style, canvSize) {
-  const paint = collectGetters(style.paint, [
-    ["raster-opacity"],
-    // ["raster-hue-rotate"],
-    // ["raster-brightness-min"],
-    // ["raster-brightness-max"],
-    // ["raster-saturation"],
-    // ["raster-contrast"],
-  ]);
-
+export function initRasterFill(layout, paint, canvSize) {
   return function(ctx, zoom, image) {
     ctx.globalAlpha = paint["raster-opacity"](zoom);
     // TODO: we are forcing one tile to cover the canvas!

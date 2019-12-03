@@ -1,31 +1,8 @@
-import { collectGetters } from "../style-func.js";
 import { getTokenParser } from "./tokens.js";
 import { getFontString  } from "./font.js";
 import { getTextShift, getTextTransform } from "./text-utils.js";
 
-export function textSetup(style) {
-  // Parse the style properties into zoom-dependent functions
-  const getLayout = collectGetters(style.layout, [
-    ["text-field"],
-    ["text-size", 16],
-    ["text-font"],
-    ["text-line-height", 1.2],
-    ["text-padding", 2.0],
-    ["text-offset", [0, 0]],
-    ["text-anchor"],
-    ["text-transform", "none"],
-  ]);
-
-  const getPaint = collectGetters(style.paint, [
-    ["text-color"],
-    ["text-halo-color"],
-    ["text-halo-width", 0],
-  ]);
-
-  return (ctx, zoom) => initTextLabeler(ctx, zoom, getLayout, getPaint);
-}
-
-function initTextLabeler(ctx, zoom, layout, paint) {
+export function initTextLabeler(ctx, zoom, layout, paint) {
   const textParser = getTokenParser( layout["text-field"](zoom) );
 
   const fontSize = layout["text-size"](zoom);

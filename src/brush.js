@@ -1,8 +1,8 @@
 import { getSetters } from "./brush-setters.js";
 import * as d3 from 'd3-geo';
 
-export function initBrush(style) {
-  const { dataFuncs, zoomFuncs, methods } = getSetters(style);
+export function initBrush(style, layout, paint) {
+  const { dataFuncs, zoomFuncs, methods } = getSetters(style, layout, paint);
 
   const setZoomFuncs = (zoom, ctx, path) => zoomFuncs.forEach(f => {
     return f.setState(f.getStyle(zoom), ctx, path);

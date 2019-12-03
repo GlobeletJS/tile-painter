@@ -2,32 +2,38 @@ import { initBackgroundFill, initRasterFill  } from "./roller.js";
 import { initBrush   } from "./brush.js";
 import { initLabeler } from "./labels/labeler.js";
 import { buildFeatureFilter } from "./filter.js";
+import { autoGetters } from "./style-func.js";
+import { layoutDefaults, paintDefaults } from "./defaults.js";
 
 export function initPainter(params) {
   const style = params.styleLayer;
   const sprite = params.spriteObject;
   const canvasSize = params.canvasSize || 512;
 
+  // Define style property getters
+  const layout = autoGetters(style.layout, layoutDefaults[style.type]);
+  const paint = autoGetters(style.paint, paintDefaults[style.type]);
+
   // Define data prep and rendering functions
   var getData, render;
   switch (style.type) {
     case "background":
       getData = () => true;
-      render = initBackgroundFill(style, canvasSize);
+      render = initBackgroundFill(layout, paint, canvasSize);
       break;
     case "raster":
       getData = makeSourceGetter(style);
-      render = initRasterFill(style, canvasSize);
+      render = initRasterFill(layout, paint, canvasSize);
       break;
     case "symbol":
       getData = makeFeatureGetter(style);
-      render = initLabeler(style, sprite);
+      render = initLabeler(layout, paint, sprite);
       break;
     case "circle":
     case "line":
     case "fill":
       getData = makeFeatureGetter(style);
-      render = initBrush(style);
+      render = initBrush(style, layout, paint);
       break;
     default:
       // Missing fill-extrusion, heatmap, hillshade
