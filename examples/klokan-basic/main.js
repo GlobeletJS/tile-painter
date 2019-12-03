@@ -1,10 +1,12 @@
-import { getTile   } from "./read.js";
-import { loadStyle } from "./style/style.js";
+import { parseStyle  } from 'tile-stencil';
+import { initPainter } from "../../src/index.js";
+import { getTile     } from "./read.js";
 
-const tileHref = "https://api.maptiler.com/tiles/v3/11/327/791.pbf?key=mrAq6zQEFxOkanukNbGm";
+const styleHref = "./klokantech-basic-style.json";
+const tileHref  = "https://api.maptiler.com/tiles/v3/11/327/791.pbf?key=mrAq6zQEFxOkanukNbGm";
+const tileSize = 512;
 
 export function main() {
-  const tileSize = 512;
   const bboxes = [];
 
   // Get a Canvas2D rendering context
@@ -12,9 +14,21 @@ export function main() {
   ctx.canvas.width = tileSize;
   ctx.canvas.height = tileSize;
 
-  // Load the style
-  let getStyle = loadStyle("./klokantech-basic-style.json", null, tileSize);
-  
+  // Load the style, and add painter functions
+  let getStyle = parseStyle(styleHref)
+    .then( addPainterFunctions );
+
+  function addPainterFunctions(styleDoc) {
+    styleDoc.layers.forEach(layer => {
+      layer.painter = initPainter({
+        canvasSize: tileSize,
+        styleLayer: layer,
+        spriteObject: styleDoc.spriteData,
+      });
+    });
+    return styleDoc;
+  }
+
   // Load a tile, parse to GeoJSON
   let tilePromise = getTile(tileHref, tileSize);
   

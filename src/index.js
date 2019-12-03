@@ -1,18 +1,14 @@
 import { initBackgroundFill, initRasterFill  } from "./roller.js";
 import { initBrush   } from "./brush.js";
-import { initLabeler } from "./labels/labeler.js";
-import { buildFeatureFilter } from "./filter.js";
-import { autoGetters } from "./style-func.js";
-import { layoutDefaults, paintDefaults } from "./defaults.js";
+import { initLabeler } from "./labeler.js";
 
 export function initPainter(params) {
   const style = params.styleLayer;
   const sprite = params.spriteObject;
   const canvasSize = params.canvasSize || 512;
 
-  // Define style property getters
-  const layout = autoGetters(style.layout, layoutDefaults[style.type]);
-  const paint = autoGetters(style.paint, paintDefaults[style.type]);
+  const layout = style.layout;
+  const paint = style.paint;
 
   // Define data prep and rendering functions
   var getData, render;
@@ -75,7 +71,7 @@ function makeSourceGetter(style) {
 function makeFeatureGetter(style) {
   const sourceName = style["source"];
   const layerName = style["source-layer"];
-  const filter = buildFeatureFilter(style.filter);
+  const filter = style.filter;
 
   return function(sources) {
     let source = sources[sourceName];

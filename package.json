@@ -18,6 +18,7 @@
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-json": "^4.0.0",
     "rollup-plugin-node-resolve": "^5.2.0",
+    "tile-stencil": "0.0.1",
     "vector-tile-js": "github:jjhembd/vector-tile-js"
   },
   "name": "tile-painter",
@@ -39,7 +40,6 @@
   },
   "homepage": "https://github.com/GlobeletJS/tile-painter#readme",
   "dependencies": {
-    "csscolorparser": "^1.0.3",
     "d3-geo": "^1.11.9"
   }
 }
