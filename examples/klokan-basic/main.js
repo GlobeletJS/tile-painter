@@ -3,7 +3,7 @@ import { initPainter } from "../../src/index.js";
 import { getTile     } from "./read.js";
 
 const styleHref = "./klokantech-basic-style.json";
-const tileHref  = "https://api.maptiler.com/tiles/v3/11/327/791.pbf?key=mrAq6zQEFxOkanukNbGm";
+const tileHref = "./maptiler_11-327-791.pbf";
 const tileSize = 512;
 
 export function main() {
