@@ -1,4 +1,4 @@
-import { fontWeights } from "./font-weights.js";
+import { popFontWeight } from "./font-weights.js";
 
 const italicRE = /(italic|oblique)$/i;
 const fontCache = {};
@@ -31,24 +31,7 @@ export function getFontString(fonts, size, lineHeight) {
     }
 
     // Get font-weight
-    var testWeight1 = parts[parts.length - 1].toLowerCase();
-    var testWeight2 = parts.slice(-2).join(" ").toLowerCase(); // 2-word weight
-    for (let w in fontWeights) {
-      if (w == testWeight1 || w.replace("-", "") == testWeight1) {
-        weight = fontWeights[w];
-        parts.pop();
-        break;
-      } else if (w.replace("-", " ") == testWeight2) {
-        weight = fontWeights[w];
-        parts.pop();
-        parts.pop();
-        break;
-      }
-    }
-    if (typeof testWeight1 == "number") {
-      weight = testWeight1;
-      parts.pop();
-    }
+    weight = popFontWeight(parts, weight);
 
     // Get font-family
     // Special handling for Noto Sans, from mapbox-to-css module on NPM
