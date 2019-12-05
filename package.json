@@ -24,7 +24,7 @@
   "name": "tile-painter",
   "description": "Parse Mapbox style documents into rendering functions",
   "version": "0.1.0",
-  "main": "src/index.js",
+  "module": "src/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/GlobeletJS/tile-painter.git"
