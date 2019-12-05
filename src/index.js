@@ -1,4 +1,4 @@
-import { initRenderer } from "./renderer.js";
+import { makePaintFunction, makeDataGetter } from "./renderer.js";
 
 export function initPainter(params) {
   const style = params.styleLayer;
@@ -7,7 +7,7 @@ export function initPainter(params) {
 
   // Define data prep and rendering functions
   const getData = makeDataGetter(style);
-  const render = initRenderer(style, sprite, canvasSize);
+  const painter = makePaintFunction(style, sprite, canvasSize);
 
   // Compose into one function
   return function(context, zoom, sources, boundingBoxes) {
@@ -22,35 +22,22 @@ export function initPainter(params) {
 
     // Save the initial context state, and restore it after rendering
     context.save();
-    render(context, zoom, data, boundingBoxes);
+    painter(context, zoom, data, boundingBoxes);
     context.restore();
 
     return true; // true to indicate canvas has changed
   }
 }
 
-function makeDataGetter(style) {
-  // Background layers don't need data
-  if (style.type === "background") return () => true;
+export function addPainters(styleDoc, canvasSize = 512) {
+  // Add a painter function to every layer in the style document
+  styleDoc.layers.forEach(layer => {
+    layer.painter = initPainter({
+      canvasSize: canvasSize,
+      styleLayer: layer,
+      spriteObject: styleDoc.spriteData,
+    });
+  });
 
-  // Store the source name, so we don't re-access the style object every time
-  const sourceName = style["source"];
-  // Raster layers don't specify a source-layer
-  if (style.type === "raster") return (sources) => sources[sourceName];
-
-  const layerName = style["source-layer"];
-  const filter = style.filter;
-
-  return function(sources) {
-    let source = sources[sourceName];
-    if (!source) return false;
-
-    let layer = source[layerName];
-    if (!layer) return false;
-
-    let features = layer.features.filter(filter);
-    if (features.length < 1) return false;
-
-    return { type: "FeatureCollection", features: features };
-  };
+  return styleDoc; // NOTE: Modified in place!
 }

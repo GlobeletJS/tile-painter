@@ -1,5 +1,5 @@
 import { parseStyle  } from 'tile-stencil';
-import { initPainter } from "../../src/index.js";
+import { addPainters } from "../../src/index.js";
 import { getTile     } from "./read.js";
 
 const styleHref = "./klokantech-basic-style.json";
@@ -16,18 +16,7 @@ export function main() {
 
   // Load the style, and add painter functions
   let getStyle = parseStyle(styleHref)
-    .then( addPainterFunctions );
-
-  function addPainterFunctions(styleDoc) {
-    styleDoc.layers.forEach(layer => {
-      layer.painter = initPainter({
-        canvasSize: tileSize,
-        styleLayer: layer,
-        spriteObject: styleDoc.spriteData,
-      });
-    });
-    return styleDoc;
-  }
+    .then( addPainters );
 
   // Load a tile, parse to GeoJSON
   let tilePromise = getTile(tileHref, tileSize);
