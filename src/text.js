@@ -7,9 +7,9 @@ export function initTextLabeler(ctx, zoom, layout, paint) {
 
   const fontSize = layout["text-size"](zoom);
   const fontFace = layout["text-font"](zoom);
-  ctx.font = getFontString(fontSize, fontFace);
-
   const lineHeight = layout["text-line-height"](zoom);
+  ctx.font = getFontString(fontFace, fontSize, lineHeight);
+
   const textPadding = layout["text-padding"](zoom);
   const textOffset = layout["text-offset"](zoom);
 
