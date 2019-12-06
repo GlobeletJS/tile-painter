@@ -19,7 +19,7 @@
     "rollup-plugin-json": "^4.0.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "tile-stencil": "0.0.1",
-    "vector-tile-js": "github:jjhembd/vector-tile-js"
+    "vector-tile-esm": "^2.1.0"
   },
   "name": "tile-painter",
   "description": "Parse Mapbox style documents into rendering functions",
