@@ -100,7 +100,9 @@ Incomplete features include:
 - [symbol-placement] values other than "point". Text following roads or
   riverbeds will not be rendered!
 - Rotated symbols (text and sprites)
+- Text wrapping for long labels. [text-max-width] is ignored
 
 Pull requests are welcomed!
 
 [symbol-placement]: https://docs.mapbox.com/mapbox-gl-js/style-spec/#layout-symbol-symbol-placement
+[text-max-width]: https://docs.mapbox.com/mapbox-gl-js/style-spec/#layout-symbol-text-max-width
