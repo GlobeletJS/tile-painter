@@ -15,7 +15,7 @@ export function makePaintFunction(style, sprite, canvasSize) {
     case "line":
       return initLine(style.layout, style.paint);
     case "fill":
-      return initFill(style.layout, style.paint);
+      return initFill(style.layout, style.paint, sprite);
     case "fill-extrusion":
     case "heatmap":
     case "hillshade":

@@ -1,15 +1,6 @@
 import { initBrush } from "./brush-stroke.js";
+import { canv, pair, makePatternSetter } from "./brush-utils.js";
 // Renders discrete lines, points, polygons... like painting with a brush
-
-function canv(property) {
-  // Create a default state setter for a Canvas 2D renderer
-  return (val, ctx) => { ctx[property] = val; };
-}
-
-function pair(getStyle, setState) {
-  // Return a style value getter and a renderer state setter as a paired object
-  return { getStyle, setState };
-}
 
 export function initCircle(layout, paint) {
   const setRadius = (radius, ctx, path) => {
@@ -45,13 +36,25 @@ export function initLine(layout, paint) {
   return initBrush({ setters, methods });
 }
 
-export function initFill(layout, paint) {
+export function initFill(layout, paint, sprite) {
+  var getStyle, setState;
+
+  let pattern = paint["fill-pattern"];
+  if (pattern.type !== "constant" || pattern() !== undefined) {
+    // Fill with a repeated sprite. Style getter returns sprite name
+    getStyle = pattern;
+    setState = makePatternSetter(sprite);
+  } else {
+    // Fill with a solid color
+    getStyle = paint["fill-color"];
+    setState = canv("fillStyle");
+  }
+
   const setters = [
-    pair(paint["fill-color"],     canv("fillStyle")),
+    pair(getStyle, setState),
     pair(paint["fill-opacity"],   canv("globalAlpha")),
     // fill-translate, 
     // fill-translate-anchor,
-    // fill-pattern,
   ];
   const methods = ["fill"];
 
