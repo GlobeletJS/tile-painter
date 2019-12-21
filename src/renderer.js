@@ -2,7 +2,26 @@ import { initBackgroundFill, initRasterFill } from "./roller.js";
 import { initCircle, initLine, initFill } from "./brush-setup.js";
 import { initLabeler } from "./labeler.js";
 
-export function makePaintFunction(style, sprite, canvasSize) {
+export function getPainter(style, sprite, canvasSize) {
+  const painter = makePaintFunction(style, sprite, canvasSize);
+
+  return function(context, zoom, data, boundingBoxes) {
+    // Quick exit if there is nothing to see here
+    if (!data) return false;
+    if (style.layout && style.layout["visibility"] === "none") return false;
+    if (style.minzoom !== undefined && zoom < style.minzoom) return false;
+    if (style.maxzoom !== undefined && zoom > style.maxzoom) return false;
+
+    // Save the initial context state, and restore it after rendering
+    context.save();
+    painter(context, zoom, data, boundingBoxes);
+    context.restore();
+
+    return true; // return value indicates whether canvas has changed
+  };
+}
+
+function makePaintFunction(style, sprite, canvasSize) {
   switch (style.type) {
     case "background":
       return initBackgroundFill(style.layout, style.paint, canvasSize);
@@ -23,30 +42,4 @@ export function makePaintFunction(style, sprite, canvasSize) {
       return console.log("ERROR in initRenderer: layer.type = " +
         style.type + " not supported!");
   }
-}
-
-export function makeDataGetter(style) {
-  // Background layers don't need data
-  if (style.type === "background") return () => true;
-
-  // Store the source name, so we don't re-access the style object every time
-  const sourceName = style["source"];
-  // Raster layers don't specify a source-layer
-  if (style.type === "raster") return (sources) => sources[sourceName];
-
-  const layerName = style["source-layer"];
-  const filter = style.filter;
-
-  return function(sources) {
-    let source = sources[sourceName];
-    if (!source) return false;
-
-    let layer = source[layerName];
-    if (!layer) return false;
-
-    let features = layer.features.filter(filter);
-    if (features.length < 1) return false;
-
-    return { type: "FeatureCollection", features: features };
-  };
 }

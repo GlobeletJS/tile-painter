@@ -1,4 +1,5 @@
-import { makePaintFunction, makeDataGetter } from "./renderer.js";
+import { getPainter } from "./renderer.js";
+import { makeDataGetter } from "./data.js";
 
 export function initPainter(params) {
   const style = params.styleLayer;
@@ -7,25 +8,11 @@ export function initPainter(params) {
 
   // Define data prep and rendering functions
   const getData = makeDataGetter(style);
-  const painter = makePaintFunction(style, sprite, canvasSize);
+  const painter = getPainter(style, sprite, canvasSize);
 
   // Compose into one function
   return function(context, zoom, sources, boundingBoxes) {
-    // Quick exits if this layer is not meant to be displayed
-    if (style.layout && style.layout["visibility"] === "none") return false;
-    if (style.minzoom !== undefined && zoom < style.minzoom) return false;
-    if (style.maxzoom !== undefined && zoom > style.maxzoom) return false;
-
-    // Get the data for the layer
-    const data = getData(sources);
-    if (!data) return false;
-
-    // Save the initial context state, and restore it after rendering
-    context.save();
-    painter(context, zoom, data, boundingBoxes);
-    context.restore();
-
-    return true; // true to indicate canvas has changed
+    return painter(context, zoom, getData(sources), boundingBoxes);
   }
 }
 
