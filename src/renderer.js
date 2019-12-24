@@ -1,5 +1,7 @@
 import { initBackgroundFill, initRasterFill } from "./roller.js";
-import { initCircle, initLine, initFill } from "./brush-setup.js";
+import { initCircle } from "./circle.js";
+//import { initCircle } from "./brush-setup.js";
+import { initLine, initFill } from "./brush-setup.js";
 import { initLabeler } from "./labeler.js";
 
 export function getPainter(style, sprite, canvasSize) {

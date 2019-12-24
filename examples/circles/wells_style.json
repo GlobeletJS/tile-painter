@@ -1,0 +1,23 @@
+{
+  "version": 8,
+  "name": "Water Wells",
+  "sources": {
+    "wells": {
+      "type": "vector",
+      "url": "./jhembd.4qt27dhz.json"
+    }
+  },
+  "layers": [
+    {
+      "id": "twdb-groundwater-v2",
+      "tilekiln-group": "data",
+      "type": "circle",
+      "source": "wells",
+      "source-layer": "TWDB_Groundwater_v2",
+      "paint": {
+        "circle-radius": 2.5,
+        "circle-color": "#0022EE"
+      }
+    }
+  ]
+}

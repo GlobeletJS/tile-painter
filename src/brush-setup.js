@@ -3,9 +3,7 @@ import { canv, pair, makePatternSetter } from "./brush-utils.js";
 // Renders discrete lines, points, polygons... like painting with a brush
 
 export function initCircle(layout, paint) {
-  const setRadius = (radius, ctx, path) => {
-    if (radius) path.pointRadius(radius);
-  };
+  const setRadius = (radius, ctx, path) => path.pointRadius(radius);
   const setters = [
     pair(paint["circle-radius"],  setRadius),
     pair(paint["circle-color"],   canv("fillStyle")),
