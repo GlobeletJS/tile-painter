@@ -12,7 +12,10 @@ export function initPainter(params) {
 
   // Compose into one function
   return function(context, zoom, sources, boundingBoxes) {
-    return painter(context, zoom, getData(sources), boundingBoxes);
+    let t0 = performance.now();
+    let data = getData(sources);
+    console.log("painter: getData time = " + (performance.now() - t0).toFixed(3) + "ms");
+    return painter(context, zoom, data, boundingBoxes);
   }
 }
 

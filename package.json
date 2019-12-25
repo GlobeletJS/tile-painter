@@ -18,7 +18,7 @@
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-json": "^4.0.0",
     "rollup-plugin-node-resolve": "^5.2.0",
-    "tile-stencil": "^0.1.2",
+    "tile-stencil": "^0.1.4",
     "vector-tile-esm": "^2.1.0"
   },
   "name": "tile-painter",
