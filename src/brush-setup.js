@@ -1,15 +1,16 @@
-import { initBrush } from "./brush-stroke.js";
-import { canv, pair, makePatternSetter } from "./brush-utils.js";
+import { canv, pair, initBrush, makePatternSetter } from "./brush-utils.js";
+
 // Renders discrete lines, points, polygons... like painting with a brush
 
 export function initCircle(layout, paint) {
-  const setRadius = (radius, ctx, path) => path.pointRadius(radius);
+  const setRadius = (radius, ctx) => ctx.lineWidth = radius * 2;
   const setters = [
     pair(paint["circle-radius"],  setRadius),
-    pair(paint["circle-color"],   canv("fillStyle")),
+    pair(paint["circle-color"],   canv("strokeStyle")),
     pair(paint["circle-opacity"], canv("globalAlpha")),
+    pair(() => "round",           canv("lineCap")),
   ];
-  const methods = ["fill"];
+  const methods = ["stroke"];
 
   return initBrush({ setters, methods });
 }

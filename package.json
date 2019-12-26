@@ -39,7 +39,5 @@
     "url": "https://github.com/GlobeletJS/tile-painter/issues"
   },
   "homepage": "https://github.com/GlobeletJS/tile-painter#readme",
-  "dependencies": {
-    "d3-geo": "^1.11.9"
-  }
+  "dependencies": {}
 }
