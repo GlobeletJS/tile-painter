@@ -1,18 +1,17 @@
-import { getTokenParser   } from "./tokens.js";
-import { getTextTransform } from "./text-utils.js";
+import { getTokenParser } from "./data-tokens.js";
 
 export function initLabelGetter(style) {
   const layout = style.layout;
 
   return function(features, zoom) {
     const getSpriteID = getTokenParser( layout["icon-image"](zoom) );
-    const textParser = getTokenParser( layout["text-field"](zoom) );
-    const textTransform = getTextTransform( layout["text-transform"](zoom) );
+    const parseText = getTokenParser( layout["text-field"](zoom) );
+    const transformText = getTextTransform( layout["text-transform"](zoom) );
 
     function getProps(properties) {
       var spriteID = getSpriteID(properties);
-      var labelText = textParser(properties);
-      if (labelText) labelText = textTransform(labelText);
+      var labelText = parseText(properties);
+      if (labelText) labelText = transformText(labelText);
       return { spriteID, labelText };
     }
 
@@ -22,4 +21,16 @@ export function initLabelGetter(style) {
 
 function initLabel(geometry, properties) {
   return { type: "Feature", geometry, properties };
+}
+
+function getTextTransform(code) {
+  switch (code) {
+    case "uppercase":
+      return f => f.toUpperCase();
+    case "lowercase":
+      return f => f.toLowerCase();
+    case "none":
+    default:
+      return f => f;
+  }
 }

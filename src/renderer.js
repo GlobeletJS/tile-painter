@@ -7,6 +7,7 @@ export function getPainter(style, sprite, canvasSize) {
 
   return function(context, zoom, data, boundingBoxes) {
     if (!data) return false;
+    if (style.layout.visibility() === "none") return false;
 
     // Save the initial context state, and restore it after rendering
     context.save();

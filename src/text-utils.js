@@ -25,15 +25,3 @@ export function getTextShift(anchor) {
       return [-0.5, 0.5];
   }
 }
-
-export function getTextTransform(code) {
-  switch (code) {
-    case "uppercase":
-      return f => f.toUpperCase();
-    case "lowercase":
-      return f => f.toLowerCase();
-    case "none":
-    default:
-      return f => f;
-  }
-}
