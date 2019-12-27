@@ -24,6 +24,12 @@ export function initPainter(params) {
   }
 }
 
+export function initPainterOnly(params) {
+  const canvasSize = params.canvasSize || 512;
+
+  return getPainter(params.styleLayer, params.spriteObject, canvasSize);
+}
+
 export function addPainters(styleDoc, canvasSize = 512) {
   // Add a painter function to every layer in the style document
   styleDoc.layers.forEach(layer => {
