@@ -5,11 +5,10 @@ function pointPath(path, point) {
 }
 
 function linePath(path, points) {
-  // Draws a LineString geometry, which is an array of Points. 
-  path.moveTo(points[0][0], points[0][1]);
-
-  var i = 0, n = points.length;
-  while (++i < n) path.lineTo(points[i][0], points[i][1]);
+  // Draws a LineString geometry, which is an array of Points.
+  var p = points[0], i = 0, n = points.length;
+  path.moveTo(p[0], p[1]);
+  while (++i < n) p = points[i], path.lineTo(p[0], p[1]);
 }
 
 function polygonPath(path, lines) {
@@ -38,7 +37,7 @@ export function geomToPath(geometry) {
   const coords = geometry.coordinates;
   if (isMulti) {
     // While loops faster than forEach: https://jsperf.com/loops/32
-    let i = -1, n = coords.length;
+    var i = -1, n = coords.length;
     while (++i < n) pathFunc(path, coords[i]);
 
   } else {

@@ -6,11 +6,7 @@ export function getPainter(style, sprite, canvasSize) {
   const painter = makePaintFunction(style, sprite, canvasSize);
 
   return function(context, zoom, data, boundingBoxes) {
-    // Quick exit if there is nothing to see here
     if (!data) return false;
-    if (style.layout && style.layout["visibility"] === "none") return false;
-    if (style.minzoom !== undefined && zoom < style.minzoom) return false;
-    if (style.maxzoom !== undefined && zoom > style.maxzoom) return false;
 
     // Save the initial context state, and restore it after rendering
     context.save();

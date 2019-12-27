@@ -30,9 +30,10 @@ export function main() {
     .then( ([style, tile]) => {
       let sources = { openmaptiles: tile };
       let t0 = performance.now();
-      style.layers.forEach( layer => layer.painter(ctx, 11, sources, bboxes) );
+      let dataTimes = style.layers.map( layer => layer.painter(ctx, 11, sources, bboxes) );
       let t1 = performance.now();
       console.log("example: total render time = " + (t1 - t0).toFixed(3)  + "ms");
+      console.log("example: total getData time = " + dataTimes.reduce((s, v) => s + v));
     });
 }
 

@@ -1,10 +1,7 @@
-import { getTokenParser } from "./tokens.js";
-import { getFontString  } from "./font.js";
-import { getTextShift, getTextTransform } from "./text-utils.js";
+import { getFontString } from "./font.js";
+import { getTextShift  } from "./text-utils.js";
 
 export function initTextLabeler(ctx, zoom, layout, paint) {
-  const textParser = getTokenParser( layout["text-field"](zoom) );
-
   const fontSize = layout["text-size"](zoom);
   const fontFace = layout["text-font"](zoom);
   const lineHeight = layout["text-line-height"](zoom);
@@ -16,8 +13,6 @@ export function initTextLabeler(ctx, zoom, layout, paint) {
   ctx.textBaseline = "bottom";
   ctx.textAlign = "left";
   const posShift = getTextShift( layout["text-anchor"](zoom) );
-
-  const transform = getTextTransform( layout["text-transform"](zoom) );
 
   const haloWidth = paint["text-halo-width"](zoom);
   if (haloWidth > 0) {
@@ -32,10 +27,9 @@ export function initTextLabeler(ctx, zoom, layout, paint) {
   return { measure, draw };
 
   function measure(feature) {
-    labelText = textParser(feature.properties);
+    labelText = feature.properties.labelText;
     if (!labelText) return;
 
-    labelText = transform(labelText);
     labelLength = ctx.measureText(labelText).width;
     labelHeight = fontSize * lineHeight;
 
