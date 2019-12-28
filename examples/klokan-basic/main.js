@@ -29,7 +29,7 @@ export function main() {
 }
 
 function renderTile(ctx, style, tile) {
-  var t0, t1;
+  var t0, t1, t2, t3;
   const bboxes = [];
 
   // Initialize the source processor
@@ -54,13 +54,18 @@ function renderTile(ctx, style, tile) {
   let getDataTime = (t1 - t0).toFixed(3) + "ms";
 
   // Render the tile, layer by layer
-  t0 = performance.now();
+  t0 = t2 = performance.now();
   layers.forEach(layer => {
+    //if (layer.id === "place_label_other") return;
     let source = sources[layer.source];
     let data = (source)
       ? source[layer.id]
       : true;
+    //if (layer.id === "place_label_other") console.log("data: " + JSON.stringify(data));
     layer.painter(ctx, tileCoords.z, data, bboxes);
+    //t3 = performance.now();
+    //console.log("dt: " + (t3 - t2).toFixed(3) + "ms  id: " + layer.id);
+    //t2 = t3;
   });
   t1 = performance.now();
   let renderTime = (t1 - t0).toFixed(3) + "ms";

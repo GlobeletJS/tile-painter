@@ -1,3 +1,5 @@
+import { geomToPath } from "./path.js";
+
 export function initPathGetter(style) {
   // Find the names of the feature properties that affect rendering
   const renderProps = Object.values(style.layout)
@@ -5,9 +7,18 @@ export function initPathGetter(style) {
     .filter(styleFunc => styleFunc.type === "property")
     .map(styleFunc => styleFunc.property);
 
-  return (renderProps.length > 0)
+  //return (renderProps.length > 0)
+  const grouper = (renderProps.length > 0)
     ? (features) => groupFeatures(features, trimProps)
     : combineFeatures;
+
+  return function(features) {
+    const grouped = grouper(features);
+    grouped.forEach(feature => {
+      feature.geometry.path = geomToPath(feature.geometry);
+    });
+    return grouped;
+  }
 
   function trimProps(properties) {
     let trimmed = {};

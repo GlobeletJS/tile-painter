@@ -27,7 +27,8 @@ export function initBrush({ setters, methods }) {
     dataFuncs.forEach(f => f.setState(f.getStyle(zoom, feature), ctx));
 
     // Construct Path and draw
-    let path = geomToPath(feature.geometry); // TODO: move to data prep
+    //let path = geomToPath(feature.geometry); // TODO: move to data prep
+    let path = feature.geometry.path;
     methods.forEach(method => ctx[method](path));
   }
 }

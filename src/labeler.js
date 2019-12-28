@@ -1,9 +1,11 @@
 import { initTextLabeler } from "./text.js";
 import { initIconLabeler } from "./icons.js";
 
-export function initLabeler(layout, paint, sprite) {
+export function initLabeler(layout, paint, sprite, canvasSize) {
   // Skip unsupported symbol types
   if (layout["symbol-placement"]() === "line") return () => undefined;
+
+  const tileBox = [[0, 0], [canvasSize, canvasSize]];
 
   return function(ctx, zoom, data, boxes) {
     const textLabeler = initTextLabeler(ctx, zoom, layout, paint);
@@ -18,12 +20,15 @@ export function initLabeler(layout, paint, sprite) {
       var iconBox = iconLabeler.measure(feature);
       if ( collides(iconBox) ) return;
 
-      if (textBox) boxes.push(textBox);
-      if (iconBox) boxes.push(iconBox);
-
-      // Draw the labels
-      iconLabeler.draw();
-      textLabeler.draw();
+      // Draw the labels, IF they are inside the tile
+      if ( iconBox && intersects(tileBox, iconBox) ) {
+        iconLabeler.draw();
+        boxes.push(iconBox);
+      }
+      if ( textBox && intersects(tileBox, textBox) ) {
+        textLabeler.draw();
+        boxes.push(textBox);
+      }
     }
 
     function collides(newBox) {

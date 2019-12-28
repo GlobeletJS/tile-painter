@@ -30,6 +30,7 @@ export function initTextLabeler(ctx, zoom, layout, paint) {
     labelText = feature.properties.labelText;
     if (!labelText) return;
 
+    // TODO: ctx.measureText is slow!! Need to pre-compute in data prep
     labelLength = ctx.measureText(labelText).width;
     labelHeight = fontSize * lineHeight;
 

@@ -25,7 +25,7 @@ function makePaintFunction(style, sprite, canvasSize) {
     case "raster":
       return initRasterFill(style.layout, style.paint, canvasSize);
     case "symbol":
-      return initLabeler(style.layout, style.paint, sprite);
+      return initLabeler(style.layout, style.paint, sprite, canvasSize);
     case "circle":
       return initCircle(style.layout, style.paint);
     case "line":
