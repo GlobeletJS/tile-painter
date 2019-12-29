@@ -28,8 +28,19 @@ export function initLine(layout, paint) {
     // line-gap-width, 
     // line-translate, line-translate-anchor,
     // line-offset, line-blur, line-gradient, line-pattern, 
-    // line-dasharray
   ];
+
+  let dasharray = paint["line-dasharray"];
+  if (dasharray.type !== "constant" || dasharray() !== undefined) {
+    const getWidth = paint["line-width"];
+    const getDash = (zoom, feature) => {
+      let width = getWidth(zoom, feature);
+      let dashes = dasharray(zoom, feature);
+      return dashes.map(d => d * width);
+    };
+    const setDash = (dash, ctx) => ctx.setLineDash(dash);
+    setters.push( pair(getDash, setDash) );
+  };
   const methods = ["stroke"];
 
   return initBrush({ setters, methods });
@@ -52,7 +63,7 @@ export function initFill(layout, paint, sprite) {
   const setters = [
     pair(getStyle, setState),
     pair(paint["fill-opacity"],   canv("globalAlpha")),
-    // fill-translate, 
+    pair(paint["fill-translate"], (t, ctx) => ctx.translate(t[0], t[1])),
     // fill-translate-anchor,
   ];
   const methods = ["fill"];
