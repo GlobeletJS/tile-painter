@@ -14,43 +14,41 @@ export function makeDataGetter(style) {
     return source;
   }
 
-  const layerName = style["source-layer"];
-  const filter = style.filter;
-
-  const processFeatures = (style.type === "symbol") 
-    ? initLabelGetter(style)
-    : initPathGetter(style);
-
   return function(source, zoom) {
     if (!source) return false;
     if (zoom < minzoom || maxzoom < zoom) return false;
 
-    let layer = source[layerName];
-    if (!layer) return false;
+    let layer = source[style.id];
+    if (!layer || layer.features.length < 1) return false;
 
-    let features = layer.features.filter(filter);
-    if (features.length < 1) return false;
-
-    features = processFeatures(features, zoom);
-    return { type: "FeatureCollection", features };
+    return layer;
   };
 }
 
-export function initSourceProcessor(styles) {
+export function initSourceCompressor(styles) {
   // Make sure supplied styles all read from the same source
   let sameSource = styles.map(s => s.source).every( (v, i, a) => v === a[0] );
   if (!sameSource) {
-    throw Error("initSourceProcessor: supplied layers use different sources!");
+    throw Error("initSourceCompressor: supplied layers use different sources!");
   }
+  // Make sure styles are vector types? TODO
 
   // Make an [ID, getter] pair for each layer
-  const getters = styles.map(style => [style.id, makeDataGetter(style)]);
+  const getters = styles.map(style => {
+    let getter = (style.type === "symbol")
+      ? initLabelGetter(style)
+      : initPathGetter(style);
+    return [style.id, getter];
+  });
 
   return function(source, zoom) {
     const processed = {};
     getters.forEach(([id, getter]) => {
-      processed[id] = getter(source, zoom);
+      let dataLayer = source[id];
+      if (!dataLayer) return;
+      let features = getter(dataLayer.features, zoom);
+      processed[id] = { type: "FeatureCollection", features };
     });
-    return processed; // Dictionary of FeatureCollections, keyed on style.id
+    return processed;
   };
 }

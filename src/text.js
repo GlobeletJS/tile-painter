@@ -30,14 +30,13 @@ export function initTextLabeler(ctx, zoom, layout, paint) {
     labelText = feature.properties.labelText;
     if (!labelText) return;
 
-    // TODO: ctx.measureText is slow!! Need to pre-compute in data prep
-    labelLength = ctx.measureText(labelText).width;
+    labelLength = feature.properties.textWidth;
     labelHeight = fontSize * lineHeight;
 
-    var coords = feature.geometry.coordinates;
     // Compute coordinates of bottom left corner of text
-    x = coords[0] + textOffset[0] * fontSize + posShift[0] * labelLength;
-    y = coords[1] + textOffset[1] * labelHeight + posShift[1] * labelHeight;
+    var coords = feature.geometry.coordinates;
+    x = coords[0] + posShift[0] * labelLength + textOffset[0] * fontSize;
+    y = coords[1] + posShift[1] * labelHeight + textOffset[1] * labelHeight;
 
     // Return a bounding box object
     return [

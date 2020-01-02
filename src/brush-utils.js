@@ -1,5 +1,3 @@
-import { geomToPath } from "./path.js";
-
 export function canv(property) {
   // Create a default state setter for a Canvas 2D renderer
   return (val, ctx) => { ctx[property] = val; };
@@ -26,10 +24,8 @@ export function initBrush({ setters, methods }) {
     // Set data-dependent context state
     dataFuncs.forEach(f => f.setState(f.getStyle(zoom, feature), ctx));
 
-    // Construct Path and draw
-    //let path = geomToPath(feature.geometry); // TODO: move to data prep
-    let path = feature.geometry.path;
-    methods.forEach(method => ctx[method](path));
+    // Draw path
+    methods.forEach(method => ctx[method](feature.geometry.path));
   }
 }
 

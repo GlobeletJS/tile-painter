@@ -1,4 +1,5 @@
 import { getTokenParser } from "./data-tokens.js";
+import { getFontString } from "./font.js";
 
 export function initLabelGetter(style) {
   const layout = style.layout;

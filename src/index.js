@@ -1,6 +1,8 @@
 import { getPainter } from "./renderer.js";
+import { initSourceFilter } from "./sources/source-filter.js";
 import { makeDataGetter } from "./data.js";
-export { initSourceProcessor } from "./data.js";
+import { initSourceCompressor } from "./data.js";
+import { initPreRenderer } from "./prerender.js";
 
 export function initPainter(params) {
   const style = params.styleLayer;
@@ -41,4 +43,34 @@ export function addPainters(styleDoc, canvasSize = 512) {
   });
 
   return styleDoc; // NOTE: Modified in place!
+}
+
+export function initVectorProcessor(layers, verbose) {
+  var t0, t1, timeString;
+
+  const filter = initSourceFilter(layers);
+  const compress = initSourceCompressor(layers);
+  const prerender = initPreRenderer(layers);
+
+  return function(tile, zoom) {
+    if (verbose) t0 = performance.now();
+
+    const dataLayers = filter(tile, zoom);
+    if (verbose) reportTime("filter");
+
+    const compressed = compress(dataLayers, zoom);
+    if (verbose) reportTime("compress");
+
+    const prerendered = prerender(compressed, zoom);
+    if (verbose) reportTime("prerender");
+
+    return prerendered;
+  };
+
+  function reportTime(process) {
+    t1 = performance.now();
+    timeString = (t1 - t0).toFixed(3) + "ms";
+    console.log("vectorProcessor: " + timeString + " " + process + "ing");
+    t0 = t1;
+  }
 }

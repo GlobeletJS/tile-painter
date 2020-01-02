@@ -1,11 +1,12 @@
 import { parseStyle  } from 'tile-stencil';
-import { addPainters } from "../../src/index.js";
+import { initVectorProcessor, addPainters } from "../../src/index.js";
 import { xhrPromise  } from "./xhr-promise.js";
 import { VectorTile  } from 'vector-tile-esm';
 import Protobuf from 'pbf';
 
 const styleHref = "./fiord-color-style.json";
 const tileHref = "./maptiler_11-327-791.pbf";
+const tileCoords = { z: 11, x: 327, y: 791 };
 const tileSize = 512;
 
 export function main() {
@@ -28,13 +29,18 @@ export function main() {
   // Render to the Canvas
   let render = Promise.all([getStyle, getTile])
     .then( ([style, tile]) => {
-      let sources = { openmaptiles: tile };
+      const omtLayers = style.layers.filter(l => l.source === "openmaptiles");
+      const processor = initVectorProcessor(omtLayers, true);
+      let sources = { openmaptiles: processor(tile, tileCoords.z) };
+      var t0 = performance.now();
       style.layers.forEach( layer => layer.painter(ctx, 11, sources, bboxes) );
+      var renderTime = (performance.now() - t0).toFixed(3) + "ms";
+      console.log("example: rendering time " + renderTime);
     });
 }
 
 function mvtToJSON(tile, size) {
-  // tile.laers is an object (not array!). In Mapbox Streets, it is an object
+  // tile.layers is an object (not array!). In Mapbox Streets, it is an object
   // of { name: layer } pairs, where name = layer.name. But this is not
   // mentioned in the spec! So we use layer.name for safety
   const jsonLayers = {};

@@ -1,11 +1,12 @@
 import { parseStyle  } from 'tile-stencil';
-import { addPainters } from "../../src/index.js";
+import { initVectorProcessor, addPainters } from "../../src/index.js";
 import { xhrPromise  } from "./xhr-promise.js";
 import { VectorTile  } from 'vector-tile-esm';
 import Protobuf from 'pbf';
 
 const styleHref = "./wells_style.json";
 const tileHref = "./wells_6-14-26.pbf";
+const tileCoords = { z: 6, x: 14, y: 26 };
 const tileSize = 512;
 
 export function main() {
@@ -31,7 +32,9 @@ export function main() {
   // Render to the Canvas
   let render = Promise.all([getStyle, getTile])
     .then( ([style, tile]) => {
-      let sources = { wells: tile };
+      const wellLayers = style.layers.filter(l => l.source === "wells");
+      const processor = initVectorProcessor(wellLayers, true);
+      let sources = { wells: processor(tile, tileCoords.z) };
       let t0 = performance.now();
       style.layers.forEach( layer => layer.painter(ctx, 6, sources, bboxes) );
       infoBox.innerHTML = "Rendering time: " + 
