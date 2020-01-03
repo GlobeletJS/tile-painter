@@ -8,6 +8,7 @@ export function initLabeler(layout, paint, sprite, canvasSize) {
   const tileBox = [[0, 0], [canvasSize, canvasSize]];
 
   return function(ctx, zoom, data, boxes) {
+    ctx.font = data.properties.font;
     const textLabeler = initTextLabeler(ctx, zoom, layout, paint);
     const iconLabeler = initIconLabeler(ctx, zoom, layout, paint, sprite);
 

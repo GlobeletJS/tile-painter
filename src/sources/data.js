@@ -1,6 +1,6 @@
-import { initSourceFilter   } from "./sources/source-filter.js";
-import { initFeatureGrouper } from "./sources/group-features.js";
-import { initLabelParser    } from "./sources/parse-labels.js";
+import { initSourceFilter   } from "./source-filter.js";
+import { initFeatureGrouper } from "./group-features.js";
+import { initLabelParser    } from "./parse-labels.js";
 import { initPreRenderer    } from "./prerender.js";
 
 export function initVectorProcessor(layers, verbose) {
@@ -54,8 +54,9 @@ function initSourceCompressor(styles) {
     getters.forEach(([id, getter]) => {
       let dataLayer = source[id];
       if (!dataLayer) return;
-      let features = getter(dataLayer.features, zoom);
-      processed[id] = { type: "FeatureCollection", features };
+      processed[id] = getter(dataLayer, zoom);
+      //let features = getter(dataLayer.features, zoom);
+      //processed[id] = { type: "FeatureCollection", features };
     });
     return processed;
   };

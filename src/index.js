@@ -1,5 +1,5 @@
 import { getPainter } from "./renderer.js";
-export { initVectorProcessor } from "./data.js";
+export { initVectorProcessor } from "./sources/data.js";
 
 export function initPainter(params) {
   const style = params.styleLayer;

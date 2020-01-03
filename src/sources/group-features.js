@@ -7,7 +7,7 @@ export function initFeatureGrouper(style) {
 
   // Return a function to group features that will be styled the same
   return (renderProps.length > 0)
-    ? (features) => groupFeatures(features, trimProps)
+    ? (data) => groupFeatures(data, trimProps)
     : combineFeatures;
 
   function trimProps(properties) {
@@ -19,10 +19,10 @@ export function initFeatureGrouper(style) {
   }
 }
 
-function groupFeatures(features, selectProperties) {
+function groupFeatures(data, selectProperties) {
   // Group features that will be styled the same
   const groups = {};
-  features.forEach(feature => {
+  data.features.forEach(feature => {
     // Keep only the properties relevant to rendering
     let properties = selectProperties(feature.properties);
 
@@ -33,15 +33,15 @@ function groupFeatures(features, selectProperties) {
     // Add this feature's coordinates to the grouped feature
     addCoords(groups[key].geometry.coordinates, feature.geometry);
   });
-
-  return Object.values(groups).map(checkType);
+  const features = Object.values(groups).map(checkType);
+  return { type: "FeatureCollection", features };
 }
 
-function combineFeatures(features) {
+function combineFeatures(data) {
   // No feature-dependent styles -- combine all features into one
-  var group = initFeature(features[0]);
-  features.forEach(f => addCoords(group.geometry.coordinates, f.geometry));
-  return [ checkType(group) ];
+  var group = initFeature(data.features[0]);
+  data.features.forEach(f => addCoords(group.geometry.coordinates, f.geometry));
+  return { type: "FeatureCollection", features: [ checkType(group) ] };
 }
 
 function initFeature(template, properties) {

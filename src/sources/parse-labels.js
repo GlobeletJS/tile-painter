@@ -4,7 +4,7 @@ export function initLabelParser(style) {
   const layout = style.layout;
 
   // Return a function to compute label text and sprite ID
-  return function(features, zoom) {
+  return function(data, zoom) {
     const getSpriteID = getTokenParser( layout["icon-image"](zoom) );
     const parseText = getTokenParser( layout["text-field"](zoom) );
     const transformText = getTextTransform( layout["text-transform"](zoom) );
@@ -16,7 +16,10 @@ export function initLabelParser(style) {
       return { spriteID, labelText };
     }
 
-    return features.map( f => initLabel(f.geometry, getProps(f.properties)) );
+    const features = data.features
+      .map( f => initLabel(f.geometry, getProps(f.properties)) );
+
+    return { type: "FeatureCollection", features };
   }
 }
 
