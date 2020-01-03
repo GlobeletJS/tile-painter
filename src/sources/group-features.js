@@ -1,10 +1,11 @@
-export function initPathGetter(style) {
+export function initFeatureGrouper(style) {
   // Find the names of the feature properties that affect rendering
   const renderProps = Object.values(style.layout)
     .concat(Object.values(style.paint))
     .filter(styleFunc => styleFunc.type === "property")
     .map(styleFunc => styleFunc.property);
 
+  // Return a function to group features that will be styled the same
   return (renderProps.length > 0)
     ? (features) => groupFeatures(features, trimProps)
     : combineFeatures;
@@ -37,6 +38,7 @@ function groupFeatures(features, selectProperties) {
 }
 
 function combineFeatures(features) {
+  // No feature-dependent styles -- combine all features into one
   var group = initFeature(features[0]);
   features.forEach(f => addCoords(group.geometry.coordinates, f.geometry));
   return [ checkType(group) ];

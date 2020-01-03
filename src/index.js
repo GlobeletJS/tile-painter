@@ -1,8 +1,5 @@
 import { getPainter } from "./renderer.js";
-import { initSourceFilter } from "./sources/source-filter.js";
-import { makeDataGetter } from "./data.js";
-import { initSourceCompressor } from "./data.js";
-import { initPreRenderer } from "./prerender.js";
+export { initVectorProcessor } from "./data.js";
 
 export function initPainter(params) {
   const style = params.styleLayer;
@@ -45,32 +42,26 @@ export function addPainters(styleDoc, canvasSize = 512) {
   return styleDoc; // NOTE: Modified in place!
 }
 
-export function initVectorProcessor(layers, verbose) {
-  var t0, t1, timeString;
+export function makeDataGetter(style) {
+  // Background layers don't need data
+  if (style.type === "background") return () => true;
 
-  const filter = initSourceFilter(layers);
-  const compress = initSourceCompressor(layers);
-  const prerender = initPreRenderer(layers);
+  const minzoom = style.minzoom || 0;
+  const maxzoom = style.maxzoom || 99; // NOTE: doesn't allow maxzoom = 0
 
-  return function(tile, zoom) {
-    if (verbose) t0 = performance.now();
-
-    const dataLayers = filter(tile, zoom);
-    if (verbose) reportTime("filter");
-
-    const compressed = compress(dataLayers, zoom);
-    if (verbose) reportTime("compress");
-
-    const prerendered = prerender(compressed, zoom);
-    if (verbose) reportTime("prerender");
-
-    return prerendered;
-  };
-
-  function reportTime(process) {
-    t1 = performance.now();
-    timeString = (t1 - t0).toFixed(3) + "ms";
-    console.log("vectorProcessor: " + timeString + " " + process + "ing");
-    t0 = t1;
+  // Raster layers don't need any data processing
+  if (style.type === "raster") return function(source, zoom) {
+    if (zoom < minzoom || maxzoom < zoom) return false;
+    return source;
   }
+
+  return function(source, zoom) {
+    if (!source) return false;
+    if (zoom < minzoom || maxzoom < zoom) return false;
+
+    let layer = source[style.id];
+    if (!layer || layer.features.length < 1) return false;
+
+    return layer;
+  };
 }

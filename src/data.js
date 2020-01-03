@@ -1,31 +1,39 @@
-import { initPathGetter  } from "./data-paths.js";
-import { initLabelGetter } from "./data-labels.js";
+import { initSourceFilter   } from "./sources/source-filter.js";
+import { initFeatureGrouper } from "./sources/group-features.js";
+import { initLabelParser    } from "./sources/parse-labels.js";
+import { initPreRenderer    } from "./prerender.js";
 
-export function makeDataGetter(style) {
-  // Background layers don't need data
-  if (style.type === "background") return () => true;
+export function initVectorProcessor(layers, verbose) {
+  var t0, t1, timeString;
 
-  const minzoom = style.minzoom || 0;
-  const maxzoom = style.maxzoom || 99; // NOTE: doesn't allow maxzoom = 0
+  const filter = initSourceFilter(layers);
+  const compress = initSourceCompressor(layers);
+  const prerender = initPreRenderer(layers);
 
-  // Raster layers don't need any data processing
-  if (style.type === "raster") return function(source, zoom) {
-    if (zoom < minzoom || maxzoom < zoom) return false;
-    return source;
-  }
+  return function(tile, zoom) {
+    if (verbose) t0 = performance.now();
 
-  return function(source, zoom) {
-    if (!source) return false;
-    if (zoom < minzoom || maxzoom < zoom) return false;
+    const dataLayers = filter(tile, zoom);
+    if (verbose) reportTime("filter");
 
-    let layer = source[style.id];
-    if (!layer || layer.features.length < 1) return false;
+    const compressed = compress(dataLayers, zoom);
+    if (verbose) reportTime("compress");
 
-    return layer;
+    const prerendered = prerender(compressed, zoom);
+    if (verbose) reportTime("prerender");
+
+    return prerendered;
   };
+
+  function reportTime(process) {
+    t1 = performance.now();
+    timeString = (t1 - t0).toFixed(3) + "ms";
+    console.log("vectorProcessor: " + timeString + " " + process + "ing");
+    t0 = t1;
+  }
 }
 
-export function initSourceCompressor(styles) {
+function initSourceCompressor(styles) {
   // Make sure supplied styles all read from the same source
   let sameSource = styles.map(s => s.source).every( (v, i, a) => v === a[0] );
   if (!sameSource) {
@@ -36,8 +44,8 @@ export function initSourceCompressor(styles) {
   // Make an [ID, getter] pair for each layer
   const getters = styles.map(style => {
     let getter = (style.type === "symbol")
-      ? initLabelGetter(style)
-      : initPathGetter(style);
+      ? initLabelParser(style)
+      : initFeatureGrouper(style);
     return [style.id, getter];
   });
 

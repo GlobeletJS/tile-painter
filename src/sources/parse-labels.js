@@ -1,9 +1,9 @@
-import { getTokenParser } from "./data-tokens.js";
-import { getFontString } from "./font.js";
+import { getTokenParser } from "./tokens.js";
 
-export function initLabelGetter(style) {
+export function initLabelParser(style) {
   const layout = style.layout;
 
+  // Return a function to compute label text and sprite ID
   return function(features, zoom) {
     const getSpriteID = getTokenParser( layout["icon-image"](zoom) );
     const parseText = getTokenParser( layout["text-field"](zoom) );
