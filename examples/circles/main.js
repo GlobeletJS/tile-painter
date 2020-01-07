@@ -1,5 +1,5 @@
 import { loadStyle, getStyleFuncs } from 'tile-stencil';
-import { initVectorProcessor, addPainters } from "../../src/index.js";
+import { initPreRenderer, addPainters } from "../../src/index.js";
 import { xhrPromise  } from "./xhr-promise.js";
 import { initTileMixer } from 'tile-mixer';
 
@@ -37,7 +37,7 @@ function renderTile(style, tile) {
 
   style.layers = style.layers.map(getStyleFuncs);
   const wellLayers = style.layers.filter(l => l.source === "wells");
-  const processor = initVectorProcessor(wellLayers, true);
+  const processor = initPreRenderer(wellLayers);
 
   const sources = { wells: processor(tile, tileCoords.z) };
 

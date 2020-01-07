@@ -1,5 +1,5 @@
 import { loadStyle, getStyleFuncs } from 'tile-stencil';
-import { initVectorProcessor, addPainters } from "../../src/index.js";
+import { initPreRenderer, addPainters } from "../../src/index.js";
 import { xhrPromise  } from "./xhr-promise.js";
 import { initTileMixer } from 'tile-mixer';
 
@@ -36,7 +36,7 @@ function renderTile(style, tile) {
 
   style.layers = style.layers.map(getStyleFuncs);
   const omtLayers = style.layers.filter(l => l.source === "openmaptiles");
-  const processor = initVectorProcessor(omtLayers, true);
+  const processor = initPreRenderer(omtLayers);
 
   const sources = { openmaptiles: processor(tile, tileCoords.z) };
 
