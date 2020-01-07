@@ -5,8 +5,9 @@
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build-examples": "npm run rollup-examples",
+    "build-examples": "npm run rollup-examples && npm run copy-worker",
     "rollup-examples": "cd examples && rollup -c",
+    "copy-worker": "echo examples/*/ | xargs -n 1 cp node_modules/tile-mixer/dist/worker.bundle.js",
     "postversion": "git push && git push --tags"
   },
   "author": "Jeshurun Hembd",
@@ -18,7 +19,8 @@
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-json": "^4.0.0",
     "rollup-plugin-node-resolve": "^5.2.0",
-    "tile-stencil": "^0.1.4",
+    "tile-mixer": "github:GlobeletJS/tile-mixer",
+    "tile-stencil": "^0.2.0",
     "vector-tile-esm": "^2.1.0"
   },
   "name": "tile-painter",

@@ -1,8 +1,7 @@
-import { parseStyle  } from 'tile-stencil';
+import { loadStyle, getStyleFuncs } from 'tile-stencil';
 import { initVectorProcessor, addPainters } from "../../src/index.js";
 import { xhrPromise  } from "./xhr-promise.js";
-import { VectorTile  } from 'vector-tile-esm';
-import Protobuf from 'pbf';
+import { initTileMixer } from 'tile-mixer';
 
 const styleHref = "./fiord-color-style.json";
 const tileHref = "./maptiler_11-327-791.pbf";
@@ -10,42 +9,41 @@ const tileCoords = { z: 11, x: 327, y: 791 };
 const tileSize = 512;
 
 export function main() {
-  const bboxes = [];
+  loadStyle(styleHref).then(getTile);
+}
 
-  // Get a Canvas2D rendering context
+function getTile(style) {
+  const mixer = initTileMixer({
+    threads: 1,
+    source: style.sources.openmaptiles,
+    layers: style.layers.filter(l => l.source === "openmaptiles"),
+  });
+
+  function render(err, tile) {
+    if (err) return console.log(err);
+    renderTile(style, tile);
+  }
+
+  mixer.request(tileCoords.z, tileCoords.x, tileCoords.y, render);
+}
+
+function renderTile(style, tile) {
   const ctx = document.getElementById("tileCanvas").getContext("2d");
   ctx.canvas.width = tileSize;
   ctx.canvas.height = tileSize;
 
-  // Load the style, and add painter functions
-  let getStyle = parseStyle(styleHref)
-    .then( addPainters );
+  const bboxes = [];
 
-  // Load a tile, parse to GeoJSON
-  let getTile = xhrPromise(tileHref, "arraybuffer")
-    .then( buffer => new VectorTile(new Protobuf(buffer)) )
-    .then( mvt => mvtToJSON(mvt, tileSize) );
+  style.layers = style.layers.map(getStyleFuncs);
+  const omtLayers = style.layers.filter(l => l.source === "openmaptiles");
+  const processor = initVectorProcessor(omtLayers, true);
 
-  // Render to the Canvas
-  let render = Promise.all([getStyle, getTile])
-    .then( ([style, tile]) => {
-      const omtLayers = style.layers.filter(l => l.source === "openmaptiles");
-      const processor = initVectorProcessor(omtLayers, true);
-      let sources = { openmaptiles: processor(tile, tileCoords.z) };
-      var t0 = performance.now();
-      style.layers.forEach( layer => layer.painter(ctx, 11, sources, bboxes) );
-      var renderTime = (performance.now() - t0).toFixed(3) + "ms";
-      console.log("example: rendering time " + renderTime);
-    });
-}
+  const sources = { openmaptiles: processor(tile, tileCoords.z) };
 
-function mvtToJSON(tile, size) {
-  // tile.layers is an object (not array!). In Mapbox Streets, it is an object
-  // of { name: layer } pairs, where name = layer.name. But this is not
-  // mentioned in the spec! So we use layer.name for safety
-  const jsonLayers = {};
-  Object.values(tile.layers).forEach(layer => {
-    jsonLayers[layer.name] = layer.toGeoJSON(size);
-  });
-  return jsonLayers;
+  addPainters(style);
+  var t0 = performance.now();
+  style.layers.forEach(layer => layer.painter(ctx, tileCoords.z, sources, bboxes));
+
+  var renderTime = (performance.now() - t0).toFixed(3) + "ms";
+  console.log("example: rendering time " + renderTime);
 }

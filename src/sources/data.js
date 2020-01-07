@@ -3,20 +3,32 @@ import { initFeatureGrouper } from "./group-features.js";
 import { initLabelParser    } from "./parse-labels.js";
 import { initPreRenderer    } from "./prerender.js";
 
+const vectorTypes = ["symbol", "circle", "line", "fill"];
+
 export function initVectorProcessor(layers, verbose) {
+  // Confirm supplied styles are all vector layers reading from the same source
+  let allVectors = layers.every( l => vectorTypes.includes(l.type) );
+  let sameSource = layers.every( l => l.source === layers[0].source );
+  if (!allVectors) {
+    throw Error("initVectorProcessor: not all layers are vector types!");
+  } else  if (!sameSource) {
+    throw Error("initVectorProcessor: supplied layers use different sources!");
+  }
+
   var t0, t1, timeString;
 
-  const filter = initSourceFilter(layers);
+  //const filter = initSourceFilter(layers);
   const compress = initSourceCompressor(layers);
   const prerender = initPreRenderer(layers);
 
   return function(tile, zoom) {
     if (verbose) t0 = performance.now();
 
-    const dataLayers = filter(tile, zoom);
-    if (verbose) reportTime("filter");
+    //const dataLayers = filter(tile, zoom);
+    //if (verbose) reportTime("filter");
 
-    const compressed = compress(dataLayers, zoom);
+    //const compressed = compress(dataLayers, zoom);
+    const compressed = compress(tile, zoom);
     if (verbose) reportTime("compress");
 
     const prerendered = prerender(compressed, zoom);
@@ -34,13 +46,6 @@ export function initVectorProcessor(layers, verbose) {
 }
 
 function initSourceCompressor(styles) {
-  // Make sure supplied styles all read from the same source
-  let sameSource = styles.map(s => s.source).every( (v, i, a) => v === a[0] );
-  if (!sameSource) {
-    throw Error("initSourceCompressor: supplied layers use different sources!");
-  }
-  // Make sure styles are vector types? TODO
-
   // Make an [ID, getter] pair for each layer
   const getters = styles.map(style => {
     let getter = (style.type === "symbol")
@@ -55,8 +60,6 @@ function initSourceCompressor(styles) {
       let dataLayer = source[id];
       if (!dataLayer) return;
       processed[id] = getter(dataLayer, zoom);
-      //let features = getter(dataLayer.features, zoom);
-      //processed[id] = { type: "FeatureCollection", features };
     });
     return processed;
   };
