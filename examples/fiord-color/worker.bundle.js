@@ -640,7 +640,7 @@ function combineFeatures(features) {
 function initFeature(template, properties) {
   var type = template.geometry.type;
   return {
-    type: "Feature",
+    //type: "Feature", // Required by GeoJSON, but not needed for rendering
     geometry: { type, coordinates: [] },
     properties: properties,
   };
@@ -711,6 +711,128 @@ function getTokenParser(tokenText) {
   };
 }
 
+// https://developer.mozilla.org/en-US/docs/Web/CSS/font-weight#Common_weight_name_mapping
+// Some obscure names from https://css3-tutorial.net/text-font/font-weight/
+// But the 2 sources conflict!! The mapping is not standardized!
+const fontWeights = {
+  "thin": 100,
+  "hairline": 100,
+  "extra-light": 200,
+  "ultra-light": 200,
+  "light": 300,
+  "book": 300,
+  "regular": 400,
+  "normal": 400,
+  "plain": 400,
+  "roman": 400,
+  "standard": 400,
+  "medium": 500,
+  "semi-bold": 600,
+  "demi-bold": 600,
+  "bold": 700,
+  "extra-bold": 800,
+  "ultra-bold": 800,
+  "heavy": 900,
+  "black": 900,
+  "fat": 900,
+  "poster": 900,
+  "ultra-black": 950,
+  "extra-black": 950,
+  "heavy-black": 950,
+};
+const wNames = Object.keys(fontWeights);
+
+function popFontWeight(words, defaultWeight) {
+  // Input words is an array of words from a font descriptor string, 
+  // where the last word (or two) may contain font-weight info. 
+  // Returns a numeric font-weight (if found), or defaultWeight
+  // NOTES
+  //  - ASSUMES font-style info (italics) has already been removed.
+  //  - Input words array may be shortened!
+
+  // If the last word is already a numeric weight, just remove and return it
+  if (typeof words.slice(-1)[0] === "number") return words.pop();
+
+  // Check if the last word matches one of the weight names in the dictionary
+  var test = words.slice(-1)[0].toLowerCase();
+  let wName = wNames.find(w => w == test || w.replace("-", "") == test);
+  if (wName) {
+    words.pop();
+    return fontWeights[wName];
+  }
+
+  // Try again with the last 2 words
+  test = words.slice(-2).join(" ").toLowerCase();
+  wName = wNames.find(w => w.replace("-", " ") == test);
+  if (wName) {
+    words.pop();
+    words.pop();
+  }
+  return fontWeights[wName] || defaultWeight;
+}
+
+const italicRE = /(italic|oblique)$/i;
+const fontCache = {};
+
+function getFontString(fonts, size, lineHeight) {
+  // TODO: Need to pre-load all needed fonts, using FontFace API
+  if (!Array.isArray(fonts)) fonts = [fonts];
+
+  // Check if we already calculated the CSS for this font
+  var cssData = fontCache[fonts.join(",")];
+  if (cssData) return combine(cssData, size, lineHeight);
+
+  var weight = 400;
+  var style = 'normal';
+  var fontFamilies = [];
+  fonts.forEach(font => {
+    var parts = font.split(' ');
+
+    // Get font-style from end of string
+    var maybeStyle = parts[parts.length - 1].toLowerCase();
+    if (["normal", "italic", "oblique"].includes(maybeStyle)) {
+      style = maybeStyle;
+      parts.pop();
+    } else if (italicRE.test(maybeStyle)) {
+      // Style is part of the last word. Separate the parts
+      // NOTE: haven't seen an example of this?
+      // Idea from the mapbox-to-css module on NPM
+      style = italicRE.exec(maybeStyle)[0];
+      parts[parts.length - 1].replace(italicRE, '');
+    }
+
+    // Get font-weight
+    weight = popFontWeight(parts, weight);
+
+    // Get font-family
+    // Special handling for Noto Sans, from mapbox-to-css module on NPM
+    var fontFamily = parts.join(" ")
+      .replace('Klokantech Noto Sans', 'Noto Sans');
+    if (fontFamily.indexOf(" ") !== -1) { // Multi-word string. Wrap it in quotes
+      fontFamily = '"' + fontFamily + '"';
+    }
+    fontFamilies.push(fontFamily);
+  });
+
+  fontFamilies.push("sans-serif"); // Last resort fallback
+
+  // CSS font property: font-style font-weight font-size/line-height font-family
+  cssData = fontCache[fonts.join(",")] = [style, weight, fontFamilies];
+
+  return combine(cssData, size, lineHeight);
+}
+function combine(cssData, size, lineHeight) {
+  // Round fontSize to the nearest 0.1 pixel
+  size = Math.round(10.0 * size) * 0.1;
+
+  // Combine with line height
+  let sizes = (lineHeight) 
+    ? size + "px/" + lineHeight 
+    : size + "px";
+
+  return [cssData[0], cssData[1], sizes, cssData[2]].join(" ");
+}
+
 function initLabelParser(style) {
   const layout = style.layout;
 
@@ -732,7 +854,11 @@ function initLabelParser(style) {
 }
 
 function initLabel(geometry, properties) {
-  return { type: "Feature", geometry, properties };
+  return {
+    //type: "Feature",  // Required by GeoJSON, but not needed for rendering
+    geometry,
+    properties,
+  };
 }
 
 function getTextTransform(code) {
@@ -747,7 +873,12 @@ function getTextTransform(code) {
   }
 }
 
-//import { buildFeatureFilter } from "./filter-feature.js";
+function getFont(layout, zoom) {
+  let fontSize = layout["text-size"](zoom);                                                           let fontFace = layout["text-font"](zoom);
+  let lineHeight = layout["text-line-height"](zoom);
+
+  return getFontString(fontFace, fontSize, lineHeight);
+}
 
 function initSourceFilter(styles) {
   // Make an [ID, getter] pair for each layer
@@ -771,7 +902,11 @@ function makeLayerFilter(style) {
   const sourceLayer = style["source-layer"];
   //const filter = buildFeatureFilter(style.filter);
   const filter = style.filter;
-  const compress = (style.type === "symbol")
+  const layout = style.layout;
+  const interactive = style.interactive;
+
+  const isLabel = style.type === "symbol";
+  const compress = (isLabel)
     ? initLabelParser(style)
     : initFeatureGrouper(style);
 
@@ -788,8 +923,11 @@ function makeLayerFilter(style) {
 
     let compressed = compress(features, zoom);
 
-    // TODO: Also return raw features if layer is meant to be interactive
-    return { type: "FeatureCollection", features: compressed };
+    let collection = { type: "FeatureCollection", compressed };
+    if (interactive) collection.features = features;
+    if (isLabel) collection.properties = { font: getFont(layout, zoom) };
+
+    return collection;
   };
 }
 
@@ -1903,9 +2041,15 @@ function sendHeader(id, err, result, zoom) {
   task.status = "parsed";
 
   // Send a header with info about each layer
-  const header = {};
-  task.layers.forEach(key => { header[key] = result[key].features.length; });
-  postMessage({ id, type: "header", payload: header });
+  const headers = {};
+  task.layers.forEach(key => {
+    let data = result[key];
+    let header = { compressed: data.compressed.length };
+    if (data.features) header.features = data.features.length;
+    if (data.properties) header.properties = data.properties;
+    headers[key] = header;
+  });
+  postMessage({ id, type: "header", payload: headers });
 }
 
 function sendData(id) {
@@ -1915,9 +2059,11 @@ function sendData(id) {
 
   var currentLayer = task.result[task.layers[0]];
   // Make sure we still have data in this layer
-  if (currentLayer && currentLayer.features.length == 0) {
+  var dataType = getDataType(currentLayer);
+  if (dataType === "none") {
     task.layers.shift();           // Discard this layer
     currentLayer = task.result[task.layers[0]];
+    dataType = getDataType(currentLayer);
   }
   if (task.layers.length == 0) {
     delete tasks[id];
@@ -1926,12 +2072,23 @@ function sendData(id) {
   }
 
   // Get the next chunk of data and send it back to the main thread
-  let chunk = getChunk(currentLayer.features);
-  postMessage({ id, type: "data", key: task.layers[0], payload: chunk });
+  var chunk = getChunk(currentLayer[dataType]);
+  postMessage({ id, type: dataType, key: task.layers[0], payload: chunk });
+}
+
+function getDataType(layer) {
+  if (!layer) return "none";
+  // All layers have a 'compressed' array
+  if (layer.compressed.length > 0) return "compressed";
+  // 'compressed' array is empty. There might still be a 'features' array
+  if (layer.features && layer.features.length > 0) return "features";
+  return "none";
 }
 
 function getChunk(arr) {
-  const maxChunk = 100000; // 100 KB
+  // Limit to 100 KB per postMessage. TODO: Consider 10KB for cheap phones? 
+  // See https://dassur.ma/things/is-postmessage-slow/
+  const maxChunk = 100000; 
 
   let chunk = [];
   let chunkSize = 0;

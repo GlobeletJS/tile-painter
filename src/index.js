@@ -1,31 +1,7 @@
 import { getPainter } from "./renderer.js";
-export { initPreRenderer } from "./sources/prerender.js";
-
-export function initPainter(params) {
-  const style = params.styleLayer;
-  const sprite = params.spriteObject;
-  const canvasSize = params.canvasSize || 512;
-
-  // Define data prep and rendering functions
-  const sourceName = style["source"];
-  const getData = makeDataGetter(style);
-  const painter = getPainter(style, sprite, canvasSize);
-
-  // Compose into one function
-  return function(context, zoom, sources, boundingBoxes) {
-    let t0 = performance.now();
-    let data = getData(sources[sourceName], zoom);
-    let t1 = performance.now();
-
-    painter(context, zoom, data, boundingBoxes);
-
-    return t1 - t0; // getData time
-  }
-}
 
 export function initPainterOnly(params) {
   const canvasSize = params.canvasSize || 512;
-
   return getPainter(params.styleLayer, params.spriteObject, canvasSize);
 }
 
@@ -42,6 +18,22 @@ export function addPainters(styleDoc, canvasSize = 512) {
   return styleDoc; // NOTE: Modified in place!
 }
 
+export function initPainter(params) {
+  const style = params.styleLayer;
+  const canvasSize = params.canvasSize || 512;
+  const paint = getPainter(style, params.spriteObject, canvasSize);
+
+  // Define data getter
+  const sourceName = style["source"];
+  const getData = makeDataGetter(style);
+
+  // Compose data getter and painter into one function
+  return function(context, zoom, sources, boundingBoxes) {
+    let data = getData(sources[sourceName], zoom);
+    return paint(context, zoom, data, boundingBoxes);
+  }
+}
+
 export function makeDataGetter(style) {
   // Background layers don't need data
   if (style.type === "background") return () => true;
@@ -56,12 +48,7 @@ export function makeDataGetter(style) {
   }
 
   return function(source, zoom) {
-    if (!source) return false;
     if (zoom < minzoom || maxzoom < zoom) return false;
-
-    let layer = source[style.id];
-    if (!layer || layer.features.length < 1) return false;
-
-    return layer;
+    if (source) return source[style.id];
   };
 }

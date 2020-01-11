@@ -17,7 +17,7 @@ export function initBrush({ setters, methods }) {
     zoomFuncs.forEach(f => f.setState(f.getStyle(zoom), ctx));
 
     // Loop over features and draw
-    data.features.forEach(feature => drawFeature(ctx, zoom, feature));
+    data.compressed.forEach(feature => drawFeature(ctx, zoom, feature));
   }
 
   function drawFeature(ctx, zoom, feature) {
@@ -25,7 +25,7 @@ export function initBrush({ setters, methods }) {
     dataFuncs.forEach(f => f.setState(f.getStyle(zoom, feature), ctx));
 
     // Draw path
-    methods.forEach(method => ctx[method](feature.geometry.path));
+    methods.forEach(method => ctx[method](feature.path));
   }
 }
 

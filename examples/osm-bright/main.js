@@ -1,7 +1,6 @@
 import { loadStyle, getStyleFuncs } from 'tile-stencil';
-import { initPreRenderer, addPainters } from "../../src/index.js";
-import { xhrPromise  } from "./xhr-promise.js";
 import { initTileMixer } from 'tile-mixer';
+import { addPainters } from "../../src/index.js";
 
 const styleHref = "./osm-bright-style.json";
 const tileHref = "./maptiler_11-327-791.pbf";
@@ -24,7 +23,8 @@ function getTile(style) {
     renderTile(style, tile);
   }
 
-  mixer.request(tileCoords.z, tileCoords.x, tileCoords.y, render);
+  let { z, x, y } = tileCoords;
+  mixer.request({ z, x, y, callback: render });
 }
 
 function renderTile(style, tile) {
@@ -33,17 +33,15 @@ function renderTile(style, tile) {
   ctx.canvas.height = tileSize;
 
   const bboxes = [];
+  const sources = { openmaptiles: tile };
 
   style.layers = style.layers.map(getStyleFuncs);
-  const omtLayers = style.layers.filter(l => l.source === "openmaptiles");
-  const processor = initPreRenderer(omtLayers);
-
-  const sources = { openmaptiles: processor(tile, tileCoords.z) };
-
   addPainters(style);
-  var t0 = performance.now();
-  style.layers.forEach(layer => layer.painter(ctx, tileCoords.z, sources, bboxes));
 
+  var t0 = performance.now();
+  style.layers
+    .forEach( layer => layer.painter(ctx, tileCoords.z, sources, bboxes) );
   var renderTime = (performance.now() - t0).toFixed(3) + "ms";
+
   console.log("example: rendering time " + renderTime);
 }

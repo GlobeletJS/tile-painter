@@ -1,7 +1,6 @@
 import { loadStyle, getStyleFuncs } from 'tile-stencil';
-import { initPreRenderer, addPainters } from "../../src/index.js";
-import { xhrPromise  } from "./xhr-promise.js";
 import { initTileMixer } from 'tile-mixer';
+import { addPainters } from "../../src/index.js";
 
 const styleHref = "./wells_style.json";
 const tileHref = "./wells_6-14-26.pbf";
@@ -24,7 +23,8 @@ export function getTile(style) {
     renderTile(style, tile);
   }
 
-  mixer.request(tileCoords.z, tileCoords.x, tileCoords.y, render);
+  let { z, x, y } = tileCoords;
+  mixer.request({ z, x, y, callback: render });
 }
 
 function renderTile(style, tile) {
@@ -34,17 +34,15 @@ function renderTile(style, tile) {
 
   const bboxes = [];
   const infoBox = document.getElementById("infoBox");
+  const sources = { wells: tile };
 
   style.layers = style.layers.map(getStyleFuncs);
-  const wellLayers = style.layers.filter(l => l.source === "wells");
-  const processor = initPreRenderer(wellLayers);
-
-  const sources = { wells: processor(tile, tileCoords.z) };
-
   addPainters(style);
-  let t0 = performance.now();
-  style.layers.forEach(layer => layer.painter(ctx, tileCoords.z, sources, bboxes));
 
+  let t0 = performance.now();
+  style.layers
+    .forEach( layer => layer.painter(ctx, tileCoords.z, sources, bboxes) );
   var renderTime = (performance.now() - t0).toFixed(3) + "ms";
+
   infoBox.innerHTML = "Rendering time: " + renderTime;
 }

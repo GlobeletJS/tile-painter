@@ -12,7 +12,7 @@ export function initLabeler(layout, paint, sprite, canvasSize) {
     const textLabeler = initTextLabeler(ctx, zoom, layout, paint);
     const iconLabeler = initIconLabeler(ctx, zoom, layout, paint, sprite);
 
-    data.features.forEach(drawLabel);
+    data.compressed.forEach(drawLabel);
 
     function drawLabel(feature) {
       var textBox = textLabeler.measure(feature);

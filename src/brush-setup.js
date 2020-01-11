@@ -1,7 +1,5 @@
 import { canv, pair, initBrush, makePatternSetter } from "./brush-utils.js";
 
-// Renders discrete lines, points, polygons... like painting with a brush
-
 export function initCircle(layout, paint) {
   const setRadius = (radius, ctx) => ctx.lineWidth = radius * 2;
   const setters = [

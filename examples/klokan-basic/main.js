@@ -1,7 +1,6 @@
 import { loadStyle, getStyleFuncs } from 'tile-stencil';
-import { initPreRenderer, initPainter } from "../../src/index.js";
-import { xhrPromise  } from "./xhr-promise.js";
 import { initTileMixer } from 'tile-mixer';
+import { initPainter } from "../../src/index.js";
 
 const styleHref = "./klokantech-basic-style.json";
 const tileHref = "./maptiler_11-327-791.pbf";
@@ -24,7 +23,8 @@ function getTile(style) {
     renderTile(style, tile);
   }
 
-  mixer.request(tileCoords.z, tileCoords.x, tileCoords.y, render);
+  let { z, x, y } = tileCoords;
+  mixer.request({ z, x, y, callback: render });
 }
 
 function renderTile(style, tile) {
@@ -33,38 +33,19 @@ function renderTile(style, tile) {
   ctx.canvas.width = tileSize;
   ctx.canvas.height = tileSize;
 
-  var t0, t1, t2, t3;
   const bboxes = [];
-
-  // Parse style functions
-  style.layers = style.layers.map(getStyleFuncs);
-
-  // Initialize the source processor
-  const omtLayers = style.layers.filter(l => l.source === "openmaptiles");
-  const processor = initPreRenderer(omtLayers);
+  const sources = { openmaptiles: tile };
 
   // Initialize the painter functions
-  const painters = style.layers.map(layer => {
-    return initPainter({
-      canvasSize: tileSize,
-      styleLayer: layer,
-      spriteObject: style.spriteData,
-    });
-  });
-
-  // Process the tile, and arrange into sources object
-  const sources = { openmaptiles: processor(tile, tileCoords.z) };
+  const spriteObject = style.spriteData;
+  const painters = style.layers
+    .map( getStyleFuncs )  // Parse the .layout and .paint functions
+    .map( styleLayer => initPainter({styleLayer, spriteObject}) );
 
   // Render the tile, layer by layer
-  t0 = t2 = performance.now();
-  painters.forEach(painter => {
-    painter(ctx, tileCoords.z, sources, bboxes);
-    //t3 = performance.now();
-    //console.log("dt: " + (t3 - t2).toFixed(3) + "ms  id: " + layer.id);
-    //t2 = t3;
-  });
-  t1 = performance.now();
-  let renderTime = (t1 - t0).toFixed(3) + "ms";
+  var t0 = performance.now();
+  painters.forEach( painter => painter(ctx, tileCoords.z, sources, bboxes) );
+  var renderTime = (performance.now() - t0).toFixed(3) + "ms";
 
   console.log("example: total render time: " + renderTime);
 }
