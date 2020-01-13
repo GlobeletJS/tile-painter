@@ -1,9 +1,12 @@
 export function makeDataGetter(style) {
   // Background layers don't need data
   if (style.type === "background") return () => true;
-
+  
   // Store the source name, so we don't re-access the style object every time
   const sourceName = style["source"];
+
+  if (style.type === "geotiff") return (sources) => sources[sourceName];
+
   // Raster layers don't specify a source-layer
   if (style.type === "raster") return (sources) => sources[sourceName];
 

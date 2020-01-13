@@ -1,4 +1,4 @@
-import { initBackgroundFill, initRasterFill } from "./roller.js";
+import { initBackgroundFill, initRasterFill, initGeoTiff } from "./roller.js";
 import { initCircle, initLine, initFill } from "./brush-setup.js";
 import { initLabeler } from "./labeler.js";
 
@@ -11,7 +11,6 @@ export function getPainter(style, sprite, canvasSize) {
     if (style.layout && style.layout["visibility"] === "none") return false;
     if (style.minzoom !== undefined && zoom < style.minzoom) return false;
     if (style.maxzoom !== undefined && zoom > style.maxzoom) return false;
-
     // Save the initial context state, and restore it after rendering
     context.save();
     painter(context, zoom, data, boundingBoxes);
@@ -35,6 +34,8 @@ function makePaintFunction(style, sprite, canvasSize) {
       return initLine(style.layout, style.paint);
     case "fill":
       return initFill(style.layout, style.paint, sprite);
+    case "geotiff":
+      return initGeoTiff(style.layout, style.paint, canvasSize);
     case "fill-extrusion":
     case "heatmap":
     case "hillshade":

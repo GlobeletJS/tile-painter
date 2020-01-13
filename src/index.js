@@ -5,7 +5,6 @@ export function initPainter(params) {
   const style = params.styleLayer;
   const sprite = params.spriteObject;
   const canvasSize = params.canvasSize || 512;
-
   // Define data prep and rendering functions
   const getData = makeDataGetter(style);
   const painter = getPainter(style, sprite, canvasSize);
