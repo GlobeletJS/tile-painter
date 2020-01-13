@@ -40,6 +40,5 @@ export function initGeoTiff(layout, paint, canvSize) {
       });
     }
     plot.render();
-    return ctx;
   };
 }
