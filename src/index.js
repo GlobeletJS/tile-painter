@@ -40,9 +40,9 @@ export function makeDataGetter(style) {
 
   const minzoom = style.minzoom || 0;
   const maxzoom = style.maxzoom || 99; // NOTE: doesn't allow maxzoom = 0
-
+  
   // Raster layers don't need any data processing
-  if (style.type === "raster") return function(source, zoom) {
+  if (style.type === "raster" || style.type === "geotiff") return function(source, zoom) {
     if (zoom < minzoom || maxzoom < zoom) return false;
     return source;
   }

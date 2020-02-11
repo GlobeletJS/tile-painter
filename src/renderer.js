@@ -1,4 +1,4 @@
-import { initBackgroundFill, initRasterFill } from "./roller.js";
+import { initBackgroundFill, initRasterFill, initGeoTiff } from "./roller.js";
 import { initCircle, initLine, initFill } from "./brush-setup.js";
 import { initLabeler } from "./labeler.js";
 
@@ -32,6 +32,8 @@ function makePaintFunction(style, sprite, canvasSize) {
       return initLine(style.layout, style.paint);
     case "fill":
       return initFill(style.layout, style.paint, sprite);
+    case "geotiff":
+      return initGeoTiff(style.layout, style.paint, canvasSize);
     case "fill-extrusion":
     case "heatmap":
     case "hillshade":

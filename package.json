@@ -20,7 +20,7 @@
     "rollup-plugin-json": "^4.0.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "tile-mixer": "github:GlobeletJS/tile-mixer",
-    "tile-stencil": "^0.2.0",
+    "tile-stencil": "github:GlobeletJS/tile-stencil#geotiff",
     "vector-tile-esm": "^2.1.0"
   },
   "name": "tile-painter",
