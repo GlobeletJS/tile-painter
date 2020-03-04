@@ -23,14 +23,14 @@ tile-painter is provided as an ESM import.
 import * as tilePainter from 'tile-painter';
 ```
 
-tilePainter exposes two methods: initPainter and addPainters
+tilePainter exposes three methods: initPainterOnly, initPainter and addPainters
 
-## initPainter
+## initPainterOnly
 Returns a painter function for a single style layer
 
 ### Syntax
 ```javascript
-const painter = initPainter(params);
+const painter = tilePainter.initPainterOnly(params);
 ```
 
 ### Parameters
@@ -49,6 +49,76 @@ The supplied parameters object has the following properties:
   `icon-<property>` parameters are set
 
 ### Return value
+initPainterOnly returns a painter function, which will render the styleLayer
+on a supplied Canvas. The painter function has the following signature:
+```javascript
+var modified = painter(context, zoom, data, boundingBoxes);
+```
+where `modified` is a (Boolean) flag indicating whether `context.canvas` has
+been changed. The supplied parameters are:
+- `context` (REQUIRED): The [Canvas 2D] rendering context on which the
+  rendering calls will be executed
+- `zoom` (REQUIRED): The map zoom level at which the layer will be rendered
+- `data`: Map data from the `source` property of the style layer, to be
+  rendered on the map. Vector tile sources must be pre-processed by the
+  [tile-mixer] module. See below for details.
+  REQUIRED for all layer types except "background"
+- `boundingBoxes` (Optional): For layers of "symbol" type. An array containing
+  the bounding boxes of "symbols" (labels and sprites) already rendered on
+  the Canvas from previous layers. Bounding boxes of any new symbols in
+  the current layer will be computed and checked for collisions with previously
+  rendered symbols. If there is a collision, the new symbol will not be
+  rendered. If there is no collision, the new symbol will be rendered, and
+  its bounding box added to the array. Bounding boxes are supplied in the
+  form [[xmin, ymin], [xmax, ymax]] in the current tile's pixel coordinates
+
+The supplied `data` object for vector layers is assumed to be a GeoJSON
+FeatureCollection, with two non-standard properties:
+- `properties`: For layers of type `symbol`, this top-level `properties`
+  object should contain a `font` property, with the value being a CSS font
+  string to be used for all `symbols` in the layer.
+- `compressed`: An array of features as pre-processed by [tile-mixer]
+
+For style layers with type `circle`, `line`, or `fill`, each feature in the
+`compressed` array should  have the following properties:
+  - `properties`: The feature properties that affect styling.
+  - `path`: A [Path2D] object corresponding to the geometry of the feature
+Path coordinates must be scaled from the vector tile's `.extent` to the 
+desired pixel size of the rendered tile. Layers of type `circle` have a path
+of the form `M x y L x y` (in SVG notation) for **each point in the layer**.
+
+For style layers with type `symbol`, each feature in the `compressed` array
+may have the following properties:
+- `geometry`: A GeoJSON geometry where the symbol will be drawn. Only `Point`
+  geometries are currently supported. REQUIRED.
+- `properties.labelText`: The text to be written at this label position
+- `properties.textWidth`: The measured width of the text, as given by
+  `ctx.measureText(labelText).width`
+- `properties.spriteID`: The key to the metadata of the sprite to be written. 
+  This will be retrieved from the `spriteObject` supplied on initialization 
+  as follows: `spriteMeta = spriteObject.meta[spriteId]`
+
+[tile-mixer]: https://github.com/GlobeletJS/tile-mixer
+[Path2D]: https://developer.mozilla.org/en-US/docs/Web/API/Path2D
+
+## initPainter
+Wrapper method for initPainterOnly. The returned function takes a `sources`
+object instead of a `data` object. This `sources` object MUST have *the same
+structure* as the `sources` property of the style document, but containing
+*actual data* for a tile.
+
+Each individual source key points to a `data` object as described above for
+initPainterOnly.
+
+### Syntax
+```javascript
+const painter = tilePainter.initPainter(params);
+```
+
+### Parameters
+See above under initPainterOnly
+
+### Return value
 initPainter returns a painter function, which will render the styleLayer
 on a supplied Canvas. The painter function has the following signature:
 ```javascript
@@ -60,25 +130,19 @@ been changed. The supplied parameters are:
   rendering calls will be executed
 - `zoom` (REQUIRED): The map zoom level at which the layer will be rendered
 - `sources`: An object with *the same structure* as the `sources` property of
-  the style document, but containing *actual data* for a tile. Note that
-  vector tile sources must be already parsed to GeoJSON, with coordinates 
-  projected to the desired pixel coordinates within the supplied context's 
-  canvas. REQUIRED for all layer types except "background"
-- `boundingBoxes` (Optional): For layers of "symbol" type. An array containing
-  the bounding boxes of "symbols" (labels and sprites) already rendered on
-  the Canvas from previous layers. Bounding boxes of any new symbols in
-  the current layer will be computed and checked for collisions with previously
-  rendered symbols. If there is a collision, the new symbol will not be
-  rendered. If there is no collision, the new symbol will be rendered, and
-  its bounding box added to the array. Bounding boxes are supplied in the
-  form [[xmin, ymin], [xmax, ymax]] in the current tile's pixel coordinates
+  the style document, but containing *actual data* for a tile. Vector tile
+  sources must be pre-processed into a GeoJSON-style object, as output by the
+  [tile-mixer] module. See initPainterOnly for details.
+  REQUIRED for all layer types except "background"
+- `boundingBoxes` (Optional): For layers of "symbol" type. See initPainterOnly
+  for details
 
 ## addPainters
 Adds a painter function to every layer of a style document
 
 ### Syntax
 ```javascript
-const styleDoc = addPainters(styleDoc, canvasSize);
+const styleDoc = tilePainter.addPainters(styleDoc, canvasSize);
 ```
 
 ### Parameters

@@ -34,7 +34,7 @@ export function initPainter(params) {
   }
 }
 
-export function makeDataGetter(style) {
+function makeDataGetter(style) {
   // Background layers don't need data
   if (style.type === "background") return () => true;
 
