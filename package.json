@@ -25,7 +25,7 @@
   },
   "name": "tile-painter",
   "description": "Parse Mapbox style documents into rendering functions",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "module": "src/index.js",
   "repository": {
     "type": "git",
