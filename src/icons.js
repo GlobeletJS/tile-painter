@@ -1,7 +1,4 @@
-import { getTokenParser } from "./tokens.js";
-
 export function initIconLabeler(ctx, zoom, layout, paint, sprite) {
-  const getSpriteID = getTokenParser( layout["icon-image"](zoom) );
   const iconPadding = layout["icon-padding"](zoom);
 
   var spriteID, spriteMeta, x, y;
@@ -9,7 +6,7 @@ export function initIconLabeler(ctx, zoom, layout, paint, sprite) {
   return { measure, draw };
 
   function measure(feature) {
-    spriteID = getSpriteID(feature.properties);
+    spriteID = feature.properties.spriteID;
     if (!spriteID) return;
 
     spriteMeta = sprite.meta[spriteID];

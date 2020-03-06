@@ -8,6 +8,27 @@ export function pair(getStyle, setState) {
   return { getStyle, setState };
 }
 
+export function initBrush({ setters, methods }) {
+  const dataFuncs = setters.filter(s => s.getStyle.type === "property");
+  const zoomFuncs = setters.filter(s => s.getStyle.type !== "property");
+
+  return function(ctx, zoom, data) {
+    // Set the non-data-dependent context state
+    zoomFuncs.forEach(f => f.setState(f.getStyle(zoom), ctx));
+
+    // Loop over features and draw
+    data.compressed.forEach(feature => drawFeature(ctx, zoom, feature));
+  }
+
+  function drawFeature(ctx, zoom, feature) {
+    // Set data-dependent context state
+    dataFuncs.forEach(f => f.setState(f.getStyle(zoom, feature), ctx));
+
+    // Draw path
+    methods.forEach(method => ctx[method](feature.path));
+  }
+}
+
 export function makePatternSetter(sprite) {
   return function(spriteID, ctx) {
     const sMeta = sprite.meta[spriteID];

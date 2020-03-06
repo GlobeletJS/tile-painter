@@ -2,20 +2,20 @@ import { loadStyle, getStyleFuncs } from 'tile-stencil';
 import { initTileMixer } from 'tile-mixer';
 import { addPainters } from "../../src/index.js";
 
-const styleHref = "./fiord-color-style.json";
-const tileHref = "./maptiler_11-327-791.pbf";
-const tileCoords = { z: 11, x: 327, y: 791 };
+const styleHref = "./wells_style.json";
+const tileHref = "./wells_6-14-26.pbf";
+const tileCoords = { z: 6, x: 14, y: 26 };
 const tileSize = 512;
 
 export function main() {
   loadStyle(styleHref).then(getTile);
 }
 
-function getTile(style) {
+export function getTile(style) {
   const mixer = initTileMixer({
     threads: 1,
-    source: style.sources.openmaptiles,
-    layers: style.layers.filter(l => l.source === "openmaptiles"),
+    source: style.sources.wells,
+    layers: style.layers.filter(l => l.source === "wells"),
   });
 
   function render(err, tile) {
@@ -33,15 +33,16 @@ function renderTile(style, tile) {
   ctx.canvas.height = tileSize;
 
   const bboxes = [];
-  const sources = { openmaptiles: tile };
+  const infoBox = document.getElementById("infoBox");
+  const sources = { wells: tile };
 
   style.layers = style.layers.map(getStyleFuncs);
   addPainters(style);
 
-  var t0 = performance.now();
+  let t0 = performance.now();
   style.layers
     .forEach( layer => layer.painter(ctx, tileCoords.z, sources, bboxes) );
   var renderTime = (performance.now() - t0).toFixed(3) + "ms";
 
-  console.log("example: rendering time " + renderTime);
+  infoBox.innerHTML = "Rendering time: " + renderTime;
 }
