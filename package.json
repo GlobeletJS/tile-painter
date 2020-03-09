@@ -5,23 +5,19 @@
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build-examples": "npm run rollup-examples && npm run copy-worker",
-    "rollup-examples": "cd examples && rollup -c",
-    "copy-worker": "echo examples/*/ | xargs -n 1 cp node_modules/tile-mixer/dist/worker.bundle.js",
+    "build-examples": "cd examples && rollup -c",
     "postversion": "git push && git push --tags"
   },
   "author": "Jeshurun Hembd",
   "license": "MIT",
   "devDependencies": {
     "http-server": "^0.12.1",
-    "pbf": "^3.2.1",
     "rollup": "^1.27.3",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-json": "^4.0.0",
     "rollup-plugin-node-resolve": "^5.2.0",
-    "tile-mixer": "0.0.2",
-    "tile-stencil": "^0.2.0",
-    "vector-tile-esm": "^2.1.0"
+    "tile-mixer": "0.0.3",
+    "tile-stencil": "^0.2.1"
   },
   "name": "tile-painter",
   "description": "Parse Mapbox style documents into rendering functions",
