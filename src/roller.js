@@ -28,7 +28,7 @@ export function initGeoTiff(layout, paint, canvSize) {
     if (paint["colorbar-type"]() === "log"){
       var logData=[];
       for (let i=0; i<data.length; i++){
-        logData[i]=Math.log(data[i]);
+        logData[i]=Math.log(Math.max(1,data[i]));
       }
       var plot = new plotty.plot({
         canvas: ctx.canvas,
