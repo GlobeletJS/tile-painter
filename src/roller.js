@@ -20,9 +20,6 @@ export function initRasterFill(layout, paint, canvSize) {
 
 export function initGeoTiff(layout, paint, canvSize) {
   return function(ctx, zoom, data) {
-    var tileSize = Math.sqrt(data.length);
-    ctx.canvas.width = tileSize;
-    ctx.canvas.height = tileSize;
     // paint pixel values onto canvas with Plotty
     //If colorbar-type=log, compute log of the data, plot on a log scale
     if (paint["colorbar-type"]() === "log"){
@@ -32,13 +29,13 @@ export function initGeoTiff(layout, paint, canvSize) {
       }
       var plot = new plotty.plot({
         canvas: ctx.canvas,
-        data: logData, width: tileSize, height: tileSize,
+        data: logData, width: canvSize, height: canvSize,
         domain: [Math.log(paint["colorbar-min"]()), Math.log(paint["colorbar-max"]())], colorScale: paint["colorbar"]()
       });
     }else if (paint["colorbar-type"] === "linear"){
       var plot = new plotty.plot({
         canvas: ctx.canvas,
-        data: data, width: tileSize, height: tileSize,
+        data: data, width: canvSize, height: canvSize,
         domain: [(paint["colorbar-min"]()), (paint["colorbar-max"]())], colorScale: paint["colorbar"]()
       });
     }
