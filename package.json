@@ -12,11 +12,11 @@
   "license": "MIT",
   "devDependencies": {
     "http-server": "^0.12.1",
-    "rollup": "^1.27.3",
+    "rollup": "^2.0.6",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-json": "^4.0.0",
     "rollup-plugin-node-resolve": "^5.2.0",
-    "tile-mixer": "0.0.3",
+    "tile-mixer": "0.0.7",
     "tile-stencil": "^0.2.1"
   },
   "name": "tile-painter",

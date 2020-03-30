@@ -1,4 +1,5 @@
 import { getPainter } from "./renderer.js";
+export { initMapPainter } from "./renderer.js";
 
 export function initPainterOnly(params) {
   const canvasSize = params.canvasSize || 512;
