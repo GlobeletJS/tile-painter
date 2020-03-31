@@ -3,6 +3,11 @@ export function canv(property) {
   return (val, ctx) => { ctx[property] = val; };
 }
 
+export function scaleCanv(property) {
+  // Canvas 2D state setter with compensation for scaling
+  return (val, ctx, scale = 1) => { ctx[property] = val / scale; };
+}
+
 export function pair(getStyle, setState) {
   // Return a style value getter and a renderer state setter as a paired object
   return { getStyle, setState };
@@ -12,17 +17,17 @@ export function initBrush({ setters, methods }) {
   const dataFuncs = setters.filter(s => s.getStyle.type === "property");
   const zoomFuncs = setters.filter(s => s.getStyle.type !== "property");
 
-  return function(ctx, zoom, data) {
+  return function(ctx, zoom, data, boxes, scale) {
     // Set the non-data-dependent context state
-    zoomFuncs.forEach(f => f.setState(f.getStyle(zoom), ctx));
+    zoomFuncs.forEach(f => f.setState(f.getStyle(zoom), ctx, scale));
 
     // Loop over features and draw
-    data.compressed.forEach(feature => drawFeature(ctx, zoom, feature));
+    data.compressed.forEach(feature => drawFeature(ctx, zoom, feature, scale));
   }
 
-  function drawFeature(ctx, zoom, feature) {
+  function drawFeature(ctx, zoom, feature, scale) {
     // Set data-dependent context state
-    dataFuncs.forEach(f => f.setState(f.getStyle(zoom, feature), ctx));
+    dataFuncs.forEach(f => f.setState(f.getStyle(zoom, feature), ctx, scale));
 
     // Draw path
     methods.forEach(method => ctx[method](feature.path));

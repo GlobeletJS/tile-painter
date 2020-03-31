@@ -1,7 +1,9 @@
-import { canv, pair, initBrush, makePatternSetter } from "./brush-utils.js";
+import { canv, scaleCanv, pair, initBrush, makePatternSetter } from "./brush-utils.js";
 
 export function initCircle(layout, paint) {
-  const setRadius = (radius, ctx) => ctx.lineWidth = radius * 2;
+  const setRadius = (radius, ctx, scale = 1) => {
+    ctx.lineWidth = radius * 2 / scale;
+  }
   const setters = [
     pair(paint["circle-radius"],  setRadius),
     pair(paint["circle-color"],   canv("strokeStyle")),
@@ -20,7 +22,7 @@ export function initLine(layout, paint) {
     pair(layout["line-miter-limit"], canv("miterLimit")),
     // line-round-limit,
 
-    pair(paint["line-width"],     canv("lineWidth")),
+    pair(paint["line-width"],     scaleCanv("lineWidth")),
     pair(paint["line-opacity"],   canv("globalAlpha")),
     pair(paint["line-color"],     canv("strokeStyle")),
     // line-gap-width, 
@@ -36,7 +38,9 @@ export function initLine(layout, paint) {
       let dashes = dasharray(zoom, feature);
       return dashes.map(d => d * width);
     };
-    const setDash = (dash, ctx) => ctx.setLineDash(dash);
+    const setDash = (dash, ctx, scale = 1) => {
+      ctx.setLineDash(dash.map(d => d / scale));
+    };
     setters.push( pair(getDash, setDash) );
   };
   const methods = ["stroke"];
@@ -58,10 +62,13 @@ export function initFill(layout, paint, sprite) {
     setState = canv("fillStyle");
   }
 
+  const setTranslate = (t, ctx, scale = 1) => {
+    ctx.translate(t[0] / scale, t[1] / scale);
+  };
   const setters = [
     pair(getStyle, setState),
     pair(paint["fill-opacity"],   canv("globalAlpha")),
-    pair(paint["fill-translate"], (t, ctx) => ctx.translate(t[0], t[1])),
+    pair(paint["fill-translate"], setTranslate),
     // fill-translate-anchor,
   ];
   const methods = ["fill"];
@@ -70,7 +77,7 @@ export function initFill(layout, paint, sprite) {
   if (outline.type !== "constant" || outline() !== undefined) {
     setters.push(
       pair(paint["fill-outline-color"], canv("strokeStyle")),
-      pair(paint["fill-outline-width"], canv("lineWidth")), // nonstandard
+      pair(paint["fill-outline-width"], scaleCanv("lineWidth")), // nonstandard
     );
     methods.push("stroke");
   }

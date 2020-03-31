@@ -24,6 +24,7 @@ export function initMapPainter(params) {
   const painter = makePaintFunction(styleLayer, spriteObject, tileSize);
   const getData = getGetter(styleLayer);
 
+  // TODO: Provide default position and crop?
   function paint({ source, position, crop, zoom, boxes }) {
     // Input source is one tile's data for a single source,
     // which for vector sources, could include multiple layers
@@ -45,7 +46,8 @@ export function initMapPainter(params) {
     area.rect(crop.x, crop.y, crop.w, crop.w);
     context.clip(area);
 
-    painter(context, zoom, data, boxes);
+    let fracZoom = zoom + Math.log2(position.w / tileSize);
+    painter(context, fracZoom, data, boxes, scaleFactor);
 
     context.restore();
     return true; // Indicate that canvas has changed
