@@ -18,33 +18,30 @@ export function initTextLabeler(ctx, zoom, layout, paint) {
   }
   ctx.fillStyle = paint["text-color"](zoom);
 
-  var labelText, labelLength, labelHeight, x, y;
-
   return { measure, draw };
 
   function measure(feature) {
-    labelText = feature.properties.labelText;
-    if (!labelText) return;
+    let text = feature.properties.labelText;
+    if (!text) return;
 
-    labelLength = feature.properties.textWidth;
-    labelHeight = fontSize * lineHeight;
+    let labelLength = feature.properties.textWidth;
+    let labelHeight = fontSize * lineHeight;
 
     // Compute coordinates of bottom left corner of text
-    var coords = feature.geometry.coordinates;
-    x = coords[0] + posShift[0] * labelLength + textOffset[0] * fontSize;
-    y = coords[1] + posShift[1] * labelHeight + textOffset[1] * labelHeight;
+    let coords = feature.geometry.coordinates;
+    let x = coords[0] + posShift[0] * labelLength + textOffset[0] * fontSize;
+    let y = coords[1] + posShift[1] * labelHeight + textOffset[1] * labelHeight;
 
-    // Return a bounding box object
-    return [
+    let bbox = [
       [x - textPadding, y - labelHeight - textPadding],
       [x + labelLength + textPadding, y + textPadding]
     ];
+
+    return { text, position: [x, y], bbox };
   }
 
-  function draw() {
-    if (!labelText) return;
-
-    if (haloWidth > 0) ctx.strokeText(labelText, x, y);
-    ctx.fillText(labelText, x, y);
+  function draw({ text, position }) {
+    if (haloWidth > 0) ctx.strokeText(text, ...position);
+    ctx.fillText(text, ...position);
   }
 }

@@ -15,20 +15,20 @@ export function initLabeler(layout, paint, sprite, canvasSize) {
     data.compressed.forEach(drawLabel);
 
     function drawLabel(feature) {
-      var textBox = textLabeler.measure(feature);
-      if ( collides(textBox) ) return;
+      let text = textLabeler.measure(feature);
+      if ( text && collides(text.bbox) ) return;
 
-      var iconBox = iconLabeler.measure(feature);
-      if ( collides(iconBox) ) return;
+      let icon = iconLabeler.measure(feature);
+      if ( icon && collides(icon.bbox) ) return;
 
       // Draw the labels, IF they are inside the tile
-      if ( iconBox && intersects(tileBox, iconBox) ) {
-        iconLabeler.draw();
-        boxes.push(iconBox);
+      if ( icon && intersects(tileBox, icon.bbox) ) {
+        iconLabeler.draw(icon);
+        boxes.push(icon.bbox); // TODO: add box even if outside?
       }
-      if ( textBox && intersects(tileBox, textBox) ) {
-        textLabeler.draw();
-        boxes.push(textBox);
+      if ( text && intersects(tileBox, text.bbox) ) {
+        textLabeler.draw(text);
+        boxes.push(text.bbox); // TODO: add box even if outside?
       }
     }
 

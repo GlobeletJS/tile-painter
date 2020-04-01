@@ -1,39 +1,29 @@
 export function initIconLabeler(ctx, zoom, layout, paint, sprite) {
-  const iconPadding = layout["icon-padding"](zoom);
-
-  var spriteID, spriteMeta, x, y;
+  const pad = layout["icon-padding"](zoom);
 
   return { measure, draw };
 
   function measure(feature) {
-    spriteID = feature.properties.spriteID;
-    if (!spriteID) return;
+    let spriteID = feature.properties.spriteID;
+    if (!spriteID || !sprite) return;
 
-    spriteMeta = sprite.meta[spriteID];
+    let meta = sprite.meta[spriteID];
+    if (!meta) return;
 
-    var coords = feature.geometry.coordinates;
-    x = Math.round(coords[0] - spriteMeta.width / 2);
-    y = Math.round(coords[1] - spriteMeta.height / 2);
+    let { x: cx, y: cy, width, height } = meta;
+    let crop = [cx, cy, width, height];
 
-    return [
-      [x - iconPadding, y - iconPadding],
-      [x + spriteMeta.width + iconPadding, y + spriteMeta.height + iconPadding]
-    ];
+    let coords = feature.geometry.coordinates;
+    let x = Math.round(coords[0] - width / 2);
+    let y = Math.round(coords[1] - height / 2);
+    let position = [x, y, width, height];
+
+    let bbox = [ [x - pad, y - pad], [x + width + pad, y + height + pad] ];
+
+    return { crop, position, bbox };
   } 
 
-  function draw() {
-    if (!spriteID) return;
-
-    ctx.drawImage(
-      sprite.image,
-      spriteMeta.x,
-      spriteMeta.y,
-      spriteMeta.width,
-      spriteMeta.height,
-      x,
-      y,
-      spriteMeta.width,
-      spriteMeta.height
-    );
+  function draw({ crop, position }) {
+    ctx.drawImage(sprite.image, ...crop, ...position);
   }
 }
