@@ -1,9 +1,9 @@
-export function initIconLabeler(ctx, zoom, layout, paint, sprite) {
+export function initIconLabeler(zoom, layout, paint, sprite) {
   const pad = layout["icon-padding"](zoom);
 
   return { measure, draw };
 
-  function measure(feature) {
+  function measure(feature, scale) {
     let spriteID = feature.properties.spriteID;
     if (!spriteID || !sprite) return;
 
@@ -13,7 +13,7 @@ export function initIconLabeler(ctx, zoom, layout, paint, sprite) {
     let { x: cx, y: cy, width, height } = meta;
     let crop = [cx, cy, width, height];
 
-    let coords = feature.geometry.coordinates;
+    let coords = feature.geometry.coordinates.map(c => c * scale);
     let x = Math.round(coords[0] - width / 2);
     let y = Math.round(coords[1] - height / 2);
     let position = [x, y, width, height];
@@ -23,7 +23,7 @@ export function initIconLabeler(ctx, zoom, layout, paint, sprite) {
     return { crop, position, bbox };
   } 
 
-  function draw({ crop, position }) {
+  function draw(ctx, { crop, position }) {
     ctx.drawImage(sprite.image, ...crop, ...position);
   }
 }
