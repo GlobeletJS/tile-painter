@@ -5,12 +5,13 @@ export function initLabeler(layout, paint, sprite, tileSize) {
   // Skip unsupported symbol types
   if (layout["symbol-placement"]() === "line") return () => undefined;
 
-  const tileBox = [[0, 0], [tileSize, tileSize]];
-
   return function(ctx, zoom, data, boxes, scale = 1) {
     const font = data.properties.font;
     const textLabeler = initTextLabeler(zoom, layout, paint, font);
     const iconLabeler = initIconLabeler(zoom, layout, paint, sprite);
+
+    const tileScale = tileSize * scale;
+    const tileBox = [[0, 0], [tileScale, tileScale]];
 
     if (scale != 1) {
       let invScale = 1 / scale;
