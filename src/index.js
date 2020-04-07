@@ -1,55 +1,54 @@
-import { getPainter } from "./renderer.js";
-export { initMapPainter } from "./renderer.js";
+import { initRenderer } from "./renderer.js";
+export { initPainterOnly, initPainter, addPainters } from "./wrappers.js";
 
-export function initPainterOnly(params) {
-  const canvasSize = params.canvasSize || 512;
-  return getPainter(params.styleLayer, params.spriteObject, canvasSize);
-}
+export function initMapPainter(params) {
+  const { context, styleLayer, spriteObject, tileSize = 512 } = params;
 
-export function addPainters(styleDoc, canvasSize = 512) {
-  // Add a painter function to every layer in the style document
-  styleDoc.layers.forEach(layer => {
-    layer.painter = initPainter({
-      canvasSize: canvasSize,
-      styleLayer: layer,
-      spriteObject: styleDoc.spriteData,
-    });
-  });
+  const painter = initRenderer(styleLayer, spriteObject, tileSize);
+  const getData = getGetter(styleLayer);
 
-  return styleDoc; // NOTE: Modified in place!
-}
+  // TODO: Provide default position and crop?
+  function paint({ source, position, crop, zoom, boxes }) {
+    // Input source is one tile's data for a single source,
+    // which for vector sources, could include multiple layers
+    let data = getData(source);
+    if (!data) return false;
 
-export function initPainter(params) {
-  const style = params.styleLayer;
-  const canvasSize = params.canvasSize || 512;
-  const paint = getPainter(style, params.spriteObject, canvasSize);
+    context.save();
 
-  // Define data getter
-  const sourceName = style["source"];
-  const getData = makeDataGetter(style);
+    // Translate coordinates to the output position
+    context.translate(position.x, position.y);
 
-  // Compose data getter and painter into one function
-  return function(context, zoom, sources, boundingBoxes) {
-    let data = getData(sources[sourceName], zoom);
-    return paint(context, zoom, data, boundingBoxes);
-  }
-}
+    // Scale and translate to match geometry of the cropped data
+    let scaleFactor = position.w / crop.w;
+    context.scale(scaleFactor, scaleFactor);
+    context.translate(-crop.x, -crop.y);
 
-function makeDataGetter(style) {
-  // Background layers don't need data
-  if (style.type === "background") return () => true;
+    // Set clipping mask, to limit rendering to the desired output area
+    let area = new Path2D();
+    area.rect(crop.x, crop.y, crop.w, crop.w);
+    context.clip(area);
 
-  const minzoom = style.minzoom || 0;
-  const maxzoom = style.maxzoom || 99; // NOTE: doesn't allow maxzoom = 0
+    // TODO: This assumes the supplied zoom is an integer!
+    let fracZoom = zoom + Math.log2(position.w / tileSize);
+    painter(context, fracZoom, data, boxes, scaleFactor);
 
-  // Raster layers don't need any data processing
-  if (style.type === "raster") return function(source, zoom) {
-    if (zoom < minzoom || maxzoom < zoom) return false;
-    return source;
+    context.restore();
+    return true; // Indicate that canvas has changed
   }
 
-  return function(source, zoom) {
-    if (zoom < minzoom || maxzoom < zoom) return false;
-    if (source) return source[style.id];
-  };
+  // Copy some style properties to the paint function
+  const { id, source, minzoom = 0, maxzoom = 99 } = styleLayer;
+  Object.assign(paint, { id, source, minzoom, maxzoom });
+
+  return paint;
+}
+
+function getGetter(style) {
+  let id = style.id;
+  switch (style.type) {
+    case "background": return () => true;
+    case "raster": return (source) => source;
+    default: return (source) => source[id];
+  }
 }
