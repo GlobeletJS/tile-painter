@@ -46,6 +46,7 @@ export function initMapPainter(params) {
     area.rect(crop.x, crop.y, crop.w, crop.w);
     context.clip(area);
 
+    // TODO: This assumes the supplied zoom is an integer!
     let fracZoom = zoom + Math.log2(position.w / tileSize);
     painter(context, fracZoom, data, boxes, scaleFactor);
 
