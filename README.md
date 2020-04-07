@@ -44,7 +44,7 @@ The supplied parameters object has the following properties:
   same coordinates as the feature geometries.  Default: 512
 - `styleLayer` (object): an element from the layers array of a Mapbox style
   document, where the `.layout` and `.paint` properties have been parsed into
-  functions. See the parseLayer function of [tile-stencil] for the expected
+  functions. See the `getStyleFuncs` method of [tile-stencil] for the expected
   signature of these functions.  REQUIRED
 - `spriteObject` (object): an object pointing to the data for a sprite atlas.
   Must include `image` and `meta` properties, pointing to *the actual data*
@@ -81,7 +81,7 @@ changed. The supplied `params` object has the following properties:
   - `y`: The y-coordinate of the source data that will be aligned with the
     top edge of the rendered area on the map
   - `w`: The width of the (square) portion of the source data that will
-    be rendered, in source data coordinates
+    be rendered, in **source data coordinates**
 - `zoom`: The current zoom level of the map, to be used in style calculations
 - `boxes` (Optional): For layers of "symbol" type. An array containing
   the bounding boxes of "symbols" (labels and sprites) already rendered on
@@ -92,9 +92,12 @@ changed. The supplied `params` object has the following properties:
   its bounding box added to the array. Bounding boxes are supplied in the
   form [[xmin, ymin], [xmax, ymax]] in the current tile's pixel coordinates
 
-### Required source data pre-processing
-The supplied `data` object for vector layers is assumed to be a GeoJSON
-FeatureCollection, with two non-standard properties:
+### Required vector source pre-processing
+The supplied `source` object for vector layers is assumed to be a dictionary
+of GeoJSON FeatureCollections, where each FeatureCollection corresponds to the
+data for one style layer (as returned by tile-mixer).
+
+Each FeatureCollection may have two non-standard properties:
 - `properties`: For layers of type `symbol`, this top-level `properties`
   object should contain a `font` property, with the value being a CSS font
   string to be used for all `symbols` in the layer.
@@ -233,8 +236,10 @@ Incomplete features include:
   riverbeds will not be rendered!
 - Rotated symbols (text and sprites)
 - Text wrapping for long labels. [text-max-width] is ignored
+- [text-letter-spacing]
 
 Pull requests are welcomed!
 
 [symbol-placement]: https://docs.mapbox.com/mapbox-gl-js/style-spec/#layout-symbol-symbol-placement
 [text-max-width]: https://docs.mapbox.com/mapbox-gl-js/style-spec/#layout-symbol-text-max-width
+[text-letter-spacing]: https://docs.mapbox.com/mapbox-gl-js/style-spec/layers/#layout-symbol-text-letter-spacing
