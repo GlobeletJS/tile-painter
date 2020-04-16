@@ -5,7 +5,7 @@ import { initLabeler } from "./labeler.js";
 export function initRenderer(style, sprite, canvasSize) {
   switch (style.type) {
     case "background":
-      return initBackgroundFill(style.layout, style.paint, canvasSize);
+      return initBackgroundFill(style.layout, style.paint);
     case "raster":
       return initRasterFill(style.layout, style.paint, canvasSize);
     case "symbol":

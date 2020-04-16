@@ -68,7 +68,7 @@ function render(source, painters, coords) {
   crop.w = Math.min(crop.w, tileSize - crop.x, tileSize - crop.y);
   coords["cropW"].value = crop.w;
 
-  let zoom = tileCoords.z;
+  let zoom = tileCoords.z + Math.log2(position.w / tileSize);
   let boxes = [];
 
   // Render the tile, layer by layer

@@ -5,10 +5,29 @@ export function initMapPainter(params) {
   const { context, styleLayer, spriteObject, tileSize = 512 } = params;
 
   const painter = initRenderer(styleLayer, spriteObject, tileSize);
-  const getData = getGetter(styleLayer);
+  if (!painter) return () => null;
 
-  // TODO: Provide default position and crop?
-  function paint({ source, position, crop, zoom, boxes }) {
+  // TODO: should maxzoom be limited to 24? See the Mapbox style spec
+  const { id, type, source, minzoom = 0, maxzoom = 99 } = styleLayer;
+
+  const getData = (type === "raster")
+    ? (source) => source
+    : (source) => source[id];
+
+  const paint = (type === "background")
+    ? paintBackground
+    : paintTile;
+
+  Object.assign(paint, { id, type, source, minzoom, maxzoom });
+
+  function paintBackground({ zoom }) {
+    // Background layer: just fill the whole canvas, no transform or clip
+    context.save();
+    painter(context, zoom); // No data needed
+    context.restore();
+  }
+
+  function paintTile({ source, position, crop, zoom, boxes }) {
     // Input source is one tile's data for a single source,
     // which for vector sources, could include multiple layers
     let data = getData(source);
@@ -29,26 +48,11 @@ export function initMapPainter(params) {
     area.rect(crop.x, crop.y, crop.w, crop.w);
     context.clip(area);
 
-    // TODO: This assumes the supplied zoom is an integer!
-    let fracZoom = zoom + Math.log2(position.w / tileSize);
-    painter(context, fracZoom, data, boxes, scaleFactor);
+    painter(context, zoom, data, boxes, scaleFactor);
 
     context.restore();
     return true; // Indicate that canvas has changed
   }
 
-  // Copy some style properties to the paint function
-  const { id, source, minzoom = 0, maxzoom = 99 } = styleLayer;
-  Object.assign(paint, { id, source, minzoom, maxzoom });
-
   return paint;
-}
-
-function getGetter(style) {
-  let id = style.id;
-  switch (style.type) {
-    case "background": return () => true;
-    case "raster": return (source) => source;
-    default: return (source) => source[id];
-  }
 }
