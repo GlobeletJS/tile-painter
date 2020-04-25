@@ -35,23 +35,15 @@ export function initBrush({ setters, methods }) {
 }
 
 export function makePatternSetter(sprite) {
+  const { image, meta } = sprite;
+  const pCanvas = document.createElement("canvas");
+  const pCtx = pCanvas.getContext("2d");
+
   return function(spriteID, ctx) {
-    const sMeta = sprite.meta[spriteID];
-    const patternCanvas = document.createElement("canvas");
-    patternCanvas.width = sMeta.width;
-    patternCanvas.height = sMeta.height;
-    const pCtx = patternCanvas.getContext("2d");
-    pCtx.drawImage(
-      sprite.image, 
-      sMeta.x, 
-      sMeta.y, 
-      sMeta.width, 
-      sMeta.height,
-      0,
-      0,
-      sMeta.width,
-      sMeta.height
-    );
-    ctx.fillStyle = ctx.createPattern(patternCanvas, "repeat");
+    const { x, y, width, height } = meta[spriteID];
+    pCanvas.width = width;
+    pCanvas.height = height;
+    pCtx.drawImage(image, x, y, width, height, 0, 0, width, height);
+    ctx.fillStyle = ctx.createPattern(pCanvas, "repeat");
   };
 }
