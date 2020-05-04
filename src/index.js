@@ -14,6 +14,8 @@ export function initMapPainter(params) {
     ? (source) => source
     : (source) => source[id];
 
+  const clipRect = context.clipRect || clip2d;
+
   const paint = (type === "background")
     ? paintBackground
     : paintTile;
@@ -35,23 +37,26 @@ export function initMapPainter(params) {
 
     context.save();
 
-    // Translate coordinates to the output position
-    context.translate(position.x, position.y);
-
-    // Scale and translate to match geometry of the cropped data
-    let scaleFactor = position.w / crop.w;
-    context.scale(scaleFactor, scaleFactor);
-    context.translate(-crop.x, -crop.y);
+    // Transform coordinates to align the crop portion of the source
+    // with the target position on the canvas
+    let scale = position.w / crop.w;
+    let tx = position.x - scale * crop.x;
+    let ty = position.y - scale * crop.y;
+    context.setTransform(scale, 0, 0, scale, tx, ty);
 
     // Set clipping mask, to limit rendering to the desired output area
-    let area = new Path2D();
-    area.rect(crop.x, crop.y, crop.w, crop.w);
-    context.clip(area);
+    clipRect(crop.x, crop.y, crop.w, crop.w);
 
-    painter(context, zoom, data, boxes, scaleFactor);
+    painter(context, zoom, data, boxes, scale);
 
     context.restore();
     return true; // Indicate that canvas has changed
+  }
+
+  function clip2d(x, y, width, height) {
+    let area = new Path2D();
+    area.rect(x, y, width, height);
+    context.clip(area);
   }
 
   return paint;
