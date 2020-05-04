@@ -37,15 +37,15 @@ export function initMapPainter(params) {
 
     context.save();
 
+    // Set clipping mask, to limit rendering to the desired output area
+    clipRect(position.x, position.y, position.w, position.w);
+
     // Transform coordinates to align the crop portion of the source
     // with the target position on the canvas
     let scale = position.w / crop.w;
     let tx = position.x - scale * crop.x;
     let ty = position.y - scale * crop.y;
     context.setTransform(scale, 0, 0, scale, tx, ty);
-
-    // Set clipping mask, to limit rendering to the desired output area
-    clipRect(crop.x, crop.y, crop.w, crop.w);
 
     painter(context, zoom, data, boxes, scale);
 
