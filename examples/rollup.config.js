@@ -1,6 +1,5 @@
 var fs = require('fs');
 import resolve from 'rollup-plugin-node-resolve';
-import commonjs from 'rollup-plugin-commonjs'; // Needed for csscolorparser
 import json from 'rollup-plugin-json';
 
 // Get a list of the directory names
@@ -16,7 +15,6 @@ function makeConfig(dir) {
     plugins: [
       json(),
       resolve(),
-      commonjs(),
     ],
     output: {
       file: dir + '/main.min.js',
