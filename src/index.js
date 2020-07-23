@@ -11,8 +11,8 @@ export function initMapPainter(params) {
   const { id, type, source, minzoom = 0, maxzoom = 99 } = styleLayer;
 
   const getData = (type === "raster")
-    ? (source) => source
-    : (source) => source[id];
+    ? (tile) => tile 
+    : (tile) => tile.layers[id];
 
   const clipRect = context.clipRect || clip2d;
 
@@ -29,7 +29,7 @@ export function initMapPainter(params) {
     context.restore();
   }
 
-  function paintTile({ source, position, crop, zoom, boxes }) {
+  function paintTile({ source, position, crop, zoom }) {
     // Input source is one tile's data for a single source,
     // which for vector sources, could include multiple layers
     let data = getData(source);
@@ -47,7 +47,7 @@ export function initMapPainter(params) {
     let ty = position.y - scale * crop.y;
     context.setTransform(scale, 0, 0, scale, tx, ty);
 
-    painter(context, zoom, data, boxes, scale);
+    painter(context, zoom, data, source.atlas, scale);
 
     context.restore();
     return true; // Indicate that canvas has changed

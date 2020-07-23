@@ -1,12 +1,6 @@
-import { getTextShift  } from "./text-utils.js";
-
 export function initTextLabeler(zoom, layout, paint, font) {
   // Evaluate layout functions at current zoom
   const fontSize = layout["text-size"](zoom);
-  const lineHeight = layout["text-line-height"](zoom);
-  const textPadding = layout["text-padding"](zoom);
-  const textOffset = layout["text-offset"](zoom);
-  const posShift = getTextShift( layout["text-anchor"](zoom) );
   const haloWidth = paint["text-halo-width"](zoom);
 
   return { setState, measure, draw };
