@@ -29,7 +29,7 @@ export function initMapPainter(params) {
     context.restore();
   }
 
-  function paintTile({ source, position, crop, zoom }) {
+  function paintTile({ source, position, crop, zoom, pixRatio = 1 }) {
     // Input source is one tile's data for a single source,
     // which for vector sources, could include multiple layers
     let data = getData(source);
@@ -47,7 +47,8 @@ export function initMapPainter(params) {
     let ty = position.y - scale * crop.y;
     context.setTransform(scale, 0, 0, scale, tx, ty);
 
-    painter(context, zoom, data, source.atlas, scale);
+    let styleScale = scale / pixRatio;
+    painter(context, zoom, data, source.atlas, styleScale);
 
     context.restore();
     return true; // Indicate that canvas has changed
