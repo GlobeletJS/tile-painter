@@ -23,7 +23,7 @@ export function initBrush({ setters, methods }) {
     if (atlas) ctx.font = atlas;
 
     // Loop over features and draw
-    data.forEach(feature => drawFeature(ctx, zoom, feature, scale));
+    data.compressed.forEach(feature => drawFeature(ctx, zoom, feature, scale));
   }
 
   function drawFeature(ctx, zoom, feature, scale) {
