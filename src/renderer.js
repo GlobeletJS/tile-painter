@@ -1,22 +1,26 @@
-import { initBackgroundFill, initRasterFill } from "./roller.js";
-import { initCircle, initLine, initFill, initSymbol } from "./brush-setup.js";
+import { initBackground } from "./background.js";
+import { initRaster } from "./raster.js";
+import { initCircle } from "./circle.js";
+import { initLine   } from "./line.js";
+import { initFill   } from "./fill.js";
+import { initSymbol } from "./symbol.js";
 
-export function initRenderer(style, sprite, canvasSize) {
+export function initRenderer(style, sprite) {
   const  { type, layout, paint } = style;
 
   switch (type) {
     case "background":
-      return initBackgroundFill(layout, paint);
+      return initBackground(paint);
     case "raster":
-      return initRasterFill(layout, paint, canvasSize);
+      return initRaster(paint);
     case "symbol":
       return initSymbol(layout, paint, sprite);
     case "circle":
-      return initCircle(layout, paint);
+      return initCircle(paint);
     case "line":
       return initLine(layout, paint);
     case "fill":
-      return initFill(layout, paint, sprite);
+      return initFill(paint, sprite);
     case "fill-extrusion":
     case "heatmap":
     case "hillshade":

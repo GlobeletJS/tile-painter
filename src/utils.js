@@ -37,6 +37,14 @@ export function initBrush({ setters, methods }) {
   }
 }
 
+export function initRoller({ setters, methods }) {
+  return function(ctx, zoom) {
+    setters.forEach(f => f.setState(f.getStyle(zoom), ctx));
+    // methods === ["fillRect"]
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  };
+}
+
 export function makePatternSetter(sprite) {
   const { image, meta } = sprite;
   const pCanvas = document.createElement("canvas");

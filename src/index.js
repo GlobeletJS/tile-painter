@@ -1,14 +1,18 @@
 import { initRenderer } from "./renderer.js";
-export { initPainterOnly, initPainter, addPainters } from "./wrappers.js";
+import { initRoller, initBrush } from "./utils.js";
 
 export function initMapPainter(params) {
-  const { context, styleLayer, spriteObject, tileSize = 512 } = params;
+  const { context, styleLayer, spriteObject } = params;
 
-  const painter = initRenderer(styleLayer, spriteObject, tileSize);
-  if (!painter) return () => null;
+  const info = initRenderer(styleLayer, spriteObject);
+  if (!info) return () => null;
 
   // TODO: should maxzoom be limited to 24? See the Mapbox style spec
-  const { id, type, source, minzoom = 0, maxzoom = 99 } = styleLayer;
+  const { id, type, source, minzoom = 0, maxzoom = 24 } = styleLayer;
+
+  const painter = (type === "background")
+    ? initRoller(info)
+    : initBrush(info);
 
   const getData = (type === "raster")
     ? (tile) => tile 
@@ -23,10 +27,7 @@ export function initMapPainter(params) {
   Object.assign(paint, { id, type, source, minzoom, maxzoom });
 
   function paintBackground({ zoom }) {
-    // Background layer: just fill the whole canvas, no transform or clip
-    context.save();
-    painter(context, zoom); // No data needed
-    context.restore();
+    painter(context, zoom);
   }
 
   function paintTile({ source, position, crop, zoom, pixRatio = 1 }) {
