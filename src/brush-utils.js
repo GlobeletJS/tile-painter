@@ -22,16 +22,18 @@ export function initBrush({ setters, methods }) {
     zoomFuncs.forEach(f => f.setState(f.getStyle(zoom), ctx, scale));
     if (atlas) ctx.font = atlas;
 
-    // Loop over features and draw
-    data.compressed.forEach(feature => drawFeature(ctx, zoom, feature, scale));
+    methods.forEach(method => {
+      // Loop over features and draw
+      data.compressed.forEach(f => drawFeature(ctx, method, zoom, f, scale));
+    });
   }
 
-  function drawFeature(ctx, zoom, feature, scale) {
+  function drawFeature(ctx, method, zoom, feature, scale) {
     // Set data-dependent context state
     dataFuncs.forEach(f => f.setState(f.getStyle(zoom, feature), ctx, scale));
 
     // Draw path
-    methods.forEach(method => ctx[method](feature.path));
+    ctx[method](feature.path);
   }
 }
 
