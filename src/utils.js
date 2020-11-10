@@ -17,10 +17,9 @@ export function initBrush({ setters, methods }) {
   const dataFuncs = setters.filter(s => s.getStyle.type === "property");
   const zoomFuncs = setters.filter(s => s.getStyle.type !== "property");
 
-  return function(ctx, zoom, data, atlas, scale) {
+  return function(ctx, zoom, data, scale) {
     // Set the non-data-dependent context state
     zoomFuncs.forEach(f => f.setState(f.getStyle(zoom), ctx, scale));
-    if (atlas) ctx.font = atlas;
 
     methods.forEach(method => {
       // Loop over features and draw
