@@ -28,6 +28,7 @@ export function initLine(layout, paint) {
     };
     setters.push( pair(getDash, setDash) );
   };
+
   const methods = ["stroke"];
 
   return { setters, methods };

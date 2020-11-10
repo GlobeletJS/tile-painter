@@ -18,48 +18,43 @@ export function initMapPainter(params) {
     ? (tile) => tile 
     : (tile) => tile.layers[id];
 
-  const clipRect = context.clipRect || clip2d;
-
   const paint = (type === "background")
     ? paintBackground
-    : paintTile;
+    : paintLayer;
 
-  Object.assign(paint, { id, type, source, minzoom, maxzoom });
+  return Object.assign(paint, { id, type, source, minzoom, maxzoom });
 
   function paintBackground({ zoom }) {
     painter(context, zoom);
   }
 
-  function paintTile({ source, position, crop, zoom, pixRatio = 1 }) {
-    // Input source is one tile's data for a single source,
-    // which for vector sources, could include multiple layers
-    let data = getData(source);
-    if (!data) return false;
+  function paintLayer({ tileset, zoom, pixRatio = 1 }) {
+    if (!tileset) return;
 
-    context.save();
+    let { translate: [tx, ty], scale } = tileset;
+    let pixScale = scale * pixRatio;
 
-    // Set clipping mask, to limit rendering to the desired output area
-    clipRect(position.x, position.y, position.w, position.w);
+    tileset.forEach(tileBox => {
+      let { x, y, sx, sy, sw, tile } = tileBox;
 
-    // Transform coordinates to align the crop portion of the source
-    // with the target position on the canvas
-    let scale = position.w / crop.w;
-    let tx = position.x - scale * crop.x;
-    let ty = position.y - scale * crop.y;
-    context.setTransform(scale, 0, 0, scale, tx, ty);
+      let data = getData(tile.data);
+      if (!data) return;
 
-    let styleScale = scale / pixRatio;
-    painter(context, zoom, data, source.atlas, styleScale);
+      let x0 = (x + tx) * pixScale;
+      let y0 = (y + ty) * pixScale;
 
-    context.restore();
-    return true; // Indicate that canvas has changed
+      // Set clipping mask, to limit rendering to the desired output area
+      context.clipRect(x0, y0, pixScale, pixScale);
+
+      // Transform coordinates to align the crop portion of the source
+      // with the target position on the canvas
+      let tileScale = pixScale / sw;
+      let dx = x0 - tileScale * sx;
+      let dy = y0 - tileScale * sy;
+      context.setTransform(tileScale, 0, 0, tileScale, dx, dy);
+
+      let styleScale = tileScale / pixRatio;
+      painter(context, zoom, data, tile.data.atlas, styleScale);
+    });
   }
-
-  function clip2d(x, y, width, height) {
-    let area = new Path2D();
-    area.rect(x, y, width, height);
-    context.clip(area);
-  }
-
-  return paint;
 }
