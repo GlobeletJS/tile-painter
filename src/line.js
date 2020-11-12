@@ -1,4 +1,4 @@
-import { canv, scaleCanv, pair } from "./utils.js";
+import { canv, pair } from "./utils.js";
 
 export function initLine(layout, paint) {
   const setters = [
@@ -7,7 +7,7 @@ export function initLine(layout, paint) {
     pair(layout["line-miter-limit"], canv("miterLimit")),
     // line-round-limit,
 
-    pair(paint["line-width"],     scaleCanv("lineWidth")),
+    pair(paint["line-width"],     canv("lineWidth")),
     pair(paint["line-opacity"],   canv("globalAlpha")),
     pair(paint["line-color"],     canv("strokeStyle")),
     // line-gap-width, 

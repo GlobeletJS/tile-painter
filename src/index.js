@@ -51,11 +51,11 @@ export function initMapPainter(params) {
     const tileScale = pixScale / sw;
     const dx = x0 - tileScale * sx;
     const dy = y0 - tileScale * sy;
-    context.setTransform(tileScale, 0, 0, tileScale, dx, dy);
+    context.setTileTransform(dx, dy, tileScale);
 
     const atlas = tile.data.atlas;
     if (atlas) context.font = atlas;
 
-    painter(context, zoom, data, scale / sw);
+    painter(context, zoom, data);
   }
 }

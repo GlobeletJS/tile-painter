@@ -1,8 +1,8 @@
 import { canv, pair } from "./utils.js";
 
 export function initCircle(paint) {
-  const setRadius = (radius, ctx, scale = 1) => {
-    ctx.lineWidth = radius * 2 / scale;
+  const setRadius = (radius, ctx) => {
+    ctx.lineWidth = radius * 2;
   }
   const setters = [
     pair(paint["circle-radius"],  setRadius),

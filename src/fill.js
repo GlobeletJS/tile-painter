@@ -1,4 +1,4 @@
-import { canv, scaleCanv, pair, makePatternSetter } from "./utils.js";
+import { canv, pair, makePatternSetter } from "./utils.js";
 
 export function initFill(paint, sprite) {
   var getStyle, setState;
@@ -14,13 +14,10 @@ export function initFill(paint, sprite) {
     setState = canv("fillStyle");
   }
 
-  const setTranslate = (t, ctx, scale = 1) => {
-    ctx.translate(t[0] / scale, t[1] / scale);
-  };
   const setters = [
     pair(getStyle, setState),
     pair(paint["fill-opacity"],   canv("globalAlpha")),
-    pair(paint["fill-translate"], setTranslate),
+    pair(paint["fill-translate"], canv("translation")),
     // fill-translate-anchor,
   ];
   const methods = ["fill"];
@@ -29,7 +26,7 @@ export function initFill(paint, sprite) {
   if (outline.type !== "constant" || outline() !== undefined) {
     setters.push(
       pair(paint["fill-outline-color"], canv("strokeStyle")),
-      pair(paint["fill-outline-width"], scaleCanv("lineWidth")), // nonstandard
+      pair(paint["fill-outline-width"], canv("lineWidth")), // nonstandard
     );
     methods.push("stroke");
   }
