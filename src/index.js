@@ -1,18 +1,15 @@
 import { initRenderer } from "./renderer.js";
-import { initRoller, initBrush } from "./utils.js";
 
 export function initMapPainter(params) {
   const { context, styleLayer, spriteObject } = params;
 
-  const info = initRenderer(styleLayer, spriteObject);
+  const info = initRenderer(context, styleLayer, spriteObject);
   if (!info) return () => null;
+
+  const { brushes, zoomFuncs, dataFuncs } = info;
 
   // TODO: should maxzoom be limited to 24? See the Mapbox style spec
   const { id, type, source, minzoom = 0, maxzoom = 24 } = styleLayer;
-
-  const painter = (type === "background")
-    ? initRoller(info)
-    : initBrush(info);
 
   const getData = (type === "raster")
     ? (tile) => tile 
@@ -20,21 +17,27 @@ export function initMapPainter(params) {
 
   const paint = (type === "background")
     ? paintBackground
-    : paintLayer;
+    : paintTileset;
 
   return Object.assign(paint, { id, type, source, minzoom, maxzoom });
 
   function paintBackground({ zoom }) {
-    painter(context, zoom);
+    zoomFuncs.forEach(f => f(zoom));
+    // methods === ["fillRect"]
+    context.fillRect(0, 0, context.canvas.width, context.canvas.height);
   }
 
-  function paintLayer({ tileset, zoom, pixRatio = 1 }) {
+  function paintTileset({ tileset, zoom, pixRatio = 1 }) {
     if (!tileset) return;
 
-    tileset.forEach(box => paintTile(box, zoom, tileset, pixRatio));
+    zoomFuncs.forEach(f => f(zoom));
+
+    brushes.forEach(brush => {
+      tileset.forEach(box => paintTile(brush, box, zoom, tileset, pixRatio));
+    });
   }
 
-  function paintTile(tileBox, zoom, transform, pixRatio) {
+  function paintTile(brush, tileBox, zoom, transform, pixRatio) {
     const { x, y, sx, sy, sw, tile } = tileBox;
 
     const data = getData(tile.data);
@@ -56,6 +59,11 @@ export function initMapPainter(params) {
     const atlas = tile.data.atlas;
     if (atlas) context.font = atlas;
 
-    painter(context, zoom, data);
+    data.compressed.forEach(f => drawFeature(brush, zoom, f));
+  }
+
+  function drawFeature(brush, zoom, feature) {
+    dataFuncs.forEach(f => f(zoom, feature));
+    brush(feature.path);
   }
 }
