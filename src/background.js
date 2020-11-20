@@ -1,9 +1,9 @@
-import { canv, pair } from "./utils.js";
+import { pair } from "./utils.js";
 
 export function initBackground(paint) {
   const setters = [
-    pair(paint["background-color"],   canv("fillStyle")),
-    pair(paint["background-opacity"], canv("globalAlpha")),
+    pair(paint["background-color"],   "fillStyle"),
+    pair(paint["background-opacity"], "globalAlpha"),
   ];
 
   const methods = ["fillRect"];

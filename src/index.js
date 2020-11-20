@@ -28,33 +28,33 @@ export function initMapPainter(params) {
   }
 
   function paintTileset({ tileset, zoom, pixRatio = 1 }) {
-    if (!tileset) return;
+    if (!tileset || !tileset.length) return;
+
+    const { x, y, z } = tileset[0];
+    const extent = 512; // TODO: don't assume this!!
+    context.setMapCoords(x, y, z, 512);
+
+    const { translate, scale } = tileset;
+    const pixScale = scale * pixRatio;
+    const dxy = [x, y].map((c, i) => (c + translate[i]) * pixScale);
+    context.setMapShift(...dxy, pixScale);
 
     zoomFuncs.forEach(f => f(zoom));
 
     brushes.forEach(brush => {
-      tileset.forEach(box => paintTile(brush, box, zoom, tileset, pixRatio));
+      tileset.forEach(box => paintTile(brush, box, zoom, translate, pixScale));
     });
   }
 
-  function paintTile(brush, tileBox, zoom, transform, pixRatio) {
-    const { x, y, sx, sy, sw, tile } = tileBox;
+  function paintTile(brush, tileBox, zoom, translate, scale) {
+    const { x, y, tile } = tileBox;
 
     const data = getData(tile.data);
     if (!data) return;
 
     // Set clipping mask, to limit rendering to the target output area
-    const { translate, scale } = transform;
-    const pixScale = scale * pixRatio;
-    const [x0, y0] = [x, y].map((c, i) => (c + translate[i]) * pixScale);
-    context.clipRect(x0, y0, pixScale, pixScale);
-
-    // Transform coordinates to align the crop portion of the source
-    // with the target area on the canvas
-    const tileScale = pixScale / sw;
-    const dx = x0 - tileScale * sx;
-    const dy = y0 - tileScale * sy;
-    context.setTileTransform(dx, dy, tileScale);
+    const [x0, y0] = [x, y].map((c, i) => (c + translate[i]) * scale);
+    context.clipRect(x0, y0, scale, scale);
 
     const atlas = tile.data.atlas;
     if (atlas) context.font = atlas;

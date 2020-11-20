@@ -13,10 +13,10 @@ export function initRenderer(context, style, sprite) {
 
   const brushes = methods.map(method => context[method]);
 
-  const zoomFuncs = setters.filter(s => s.getStyle.type !== "property")
-    .map(s => (z) => s.setState(s.getStyle(z), context));
-  const dataFuncs = setters.filter(s => s.getStyle.type === "property")
-    .map(s => (z, feature) => s.setState(s.getStyle(z, feature), context));
+  const zoomFuncs = setters.filter(s => s.type !== "property")
+    .map(s => (z) => (context[s.key] = s.get(z)));
+  const dataFuncs = setters.filter(s => s.type === "property")
+    .map(s => (z, f) => (context[s.key] = s.get(z, f)));
 
   return { brushes, zoomFuncs, dataFuncs };
 }

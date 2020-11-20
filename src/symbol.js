@@ -1,11 +1,11 @@
-import { canv, pair } from "./utils.js";
+import { pair } from "./utils.js";
 
 export function initSymbol(paint, sprite) {
   const setters = [
-    pair(paint["text-color"], canv("fillStyle")),
-    pair(paint["text-opacity"], canv("globalAlpha")),
+    pair(paint["text-color"], "fillStyle"),
+    pair(paint["text-opacity"], "globalAlpha"),
 
-    pair(paint["text-halo-color"], canv("strokeStyle")),
+    pair(paint["text-halo-color"], "strokeStyle"),
   ];
 
   const methods = ["fillText"];

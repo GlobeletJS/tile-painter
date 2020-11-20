@@ -1,14 +1,12 @@
-import { canv, pair } from "./utils.js";
+import { pair } from "./utils.js";
 
 export function initCircle(paint) {
-  const setRadius = (radius, ctx) => {
-    ctx.lineWidth = radius * 2;
-  }
+  const getDiameter = (z, f) => paint["circle-radius"](z, f) * 2;
   const setters = [
-    pair(paint["circle-radius"],  setRadius),
-    pair(paint["circle-color"],   canv("strokeStyle")),
-    pair(paint["circle-opacity"], canv("globalAlpha")),
-    pair(() => "round",           canv("lineCap")),
+    pair(getDiameter,             "lineWidth"),
+    pair(paint["circle-color"],   "strokeStyle"),
+    pair(paint["circle-opacity"], "globalAlpha"),
+    pair(() => "round",           "lineCap"),
   ];
 
   const methods = ["stroke"];
