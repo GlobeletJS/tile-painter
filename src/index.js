@@ -6,7 +6,7 @@ export function initMapPainter(params) {
   const info = initRenderer(context, styleLayer, spriteObject);
   if (!info) return () => null;
 
-  const { brushes, zoomFuncs, dataFuncs } = info;
+  const { method, zoomFuncs, dataFuncs } = info;
 
   // TODO: should maxzoom be limited to 24? See the Mapbox style spec
   const { id, type, source, minzoom = 0, maxzoom = 24 } = styleLayer;
@@ -41,12 +41,10 @@ export function initMapPainter(params) {
 
     zoomFuncs.forEach(f => f(zoom));
 
-    brushes.forEach(brush => {
-      tileset.forEach(box => paintTile(brush, box, zoom, translate, pixScale));
-    });
+    tileset.forEach(box => paintTile(box, zoom, translate, pixScale));
   }
 
-  function paintTile(brush, tileBox, zoom, translate, scale) {
+  function paintTile(tileBox, zoom, translate, scale) {
     const { x, y, tile } = tileBox;
 
     const data = getData(tile.data);
@@ -59,11 +57,11 @@ export function initMapPainter(params) {
     const atlas = tile.data.atlas;
     if (atlas) context.font = atlas;
 
-    data.compressed.forEach(f => drawFeature(brush, zoom, f));
+    data.compressed.forEach(f => drawFeature(zoom, f));
   }
 
-  function drawFeature(brush, zoom, feature) {
+  function drawFeature(zoom, feature) {
     dataFuncs.forEach(f => f(zoom, feature));
-    brush(feature.path);
+    context[method](feature.path);
   }
 }
