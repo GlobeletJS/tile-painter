@@ -10,13 +10,10 @@ export function getSetters(style) {
         pair(paint["background-opacity"], "globalAlpha"),
       ];
     case "circle":
-      let getDiameter = (z, f) => paint["circle-radius"](z, f) * 2;
-      getDiameter.type = paint["circle-radius"].type;
       return [
-        pair(getDiameter,             "lineWidth"),
+        pair(paint["circle-radius"],  "circleRadius"),
         pair(paint["circle-color"],   "strokeStyle"),
         pair(paint["circle-opacity"], "globalAlpha"),
-        pair(() => "round",           "lineCap"),
       ];
     case "line":
       return [
